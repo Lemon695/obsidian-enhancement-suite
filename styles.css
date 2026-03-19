@@ -1,0 +1,273 @@
+/* Enhancement Suite — plugin styles */
+
+/* Settings tab: introductory paragraph */
+.enhancement-settings-intro {
+	color: var(--text-muted);
+	margin-bottom: 1rem;
+}
+
+/* Settings tab: wrapper for a single module's toggle + its settings */
+.enhancement-module-section {
+	border-top: 1px solid var(--background-modifier-border);
+	padding-top: 0.25rem;
+	margin-top: 0.25rem;
+}
+
+/* Settings tab: indent module-specific settings below the toggle */
+.enhancement-module-settings {
+	padding-left: 1rem;
+	border-left: 2px solid var(--background-modifier-border);
+	margin-left: 0.5rem;
+	margin-bottom: 0.5rem;
+}
+
+/* Reduce vertical padding for sub-settings rows */
+.enhancement-module-settings .setting-item {
+	padding-top: 0.5rem;
+	padding-bottom: 0.5rem;
+}
+
+/* ============================================================
+   Replace Modal (es-replace-modal)
+   ============================================================ */
+
+/* 状态行：显示匹配数 */
+.es-replace-status {
+	font-size: var(--font-small);
+	color: var(--text-muted);
+	margin: 0.25rem 0 0.5rem;
+	min-height: 1.2em;
+}
+
+/* 结果预览列表容器 */
+.es-replace-results {
+	max-height: 260px;
+	overflow-y: auto;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	margin-top: 0.5rem;
+}
+
+/* 单条结果行 */
+.es-replace-result-row {
+	display: flex;
+	align-items: baseline;
+	gap: 0.5rem;
+	padding: 0.25rem 0.5rem;
+	border-bottom: 1px solid var(--background-modifier-border);
+	font-size: var(--font-small);
+}
+
+.es-replace-result-row:last-child {
+	border-bottom: none;
+}
+
+/* 行号标签 */
+.es-replace-result-line {
+	flex-shrink: 0;
+	color: var(--text-faint);
+	font-family: var(--font-monospace);
+	min-width: 3rem;
+}
+
+/* 行内容文本（单行截断） */
+.es-replace-result-text {
+	font-family: var(--font-monospace);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: var(--text-normal);
+}
+
+/* 高亮匹配词 */
+.es-replace-highlight {
+	background-color: var(--text-highlight-bg);
+	color: var(--text-normal);
+	border-radius: 2px;
+	padding: 0 2px;
+}
+
+/* 超出 50 条时的提示 */
+.es-replace-overflow {
+	padding: 0.25rem 0.5rem;
+	font-size: var(--font-small);
+	color: var(--text-faint);
+	font-style: italic;
+}
+
+/* ============================================================
+   Export Modal (es-export-modal)
+   ============================================================ */
+
+/* ============================================================
+   JSON Property Viewer (es-json)
+   ============================================================ */
+
+/* Properties 面板中 JSON 对象属性值的视觉提示 */
+.es-json-value-hint {
+	cursor: pointer;
+	border-radius: var(--radius-s);
+	transition: background-color 0.1s ease;
+}
+
+.es-json-value-hint:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+/* 弹窗宽度覆盖（比默认 Modal 更宽，容纳长 JSON） */
+.es-json-viewer-modal {
+	width: min(720px, 90vw);
+}
+
+/* 树形容器 */
+.es-json-tree {
+	font-family: var(--font-monospace);
+	font-size: var(--font-small);
+	line-height: 1.7;
+	overflow: auto;
+	max-height: 62vh;
+	padding: 0.75rem 1rem;
+	background: var(--background-secondary);
+	border-radius: var(--radius-s);
+	margin-bottom: 1rem;
+}
+
+/* 行布局（header / footer / leaf 三种行通用） */
+.es-json-header-row,
+.es-json-footer-row,
+.es-json-row {
+	display: flex;
+	align-items: baseline;
+	flex-wrap: nowrap;
+	gap: 0;
+	min-height: 1.7em;
+}
+
+/* 字符串展开后允许换行，逗号随之换行 */
+.es-json-row-expanded {
+	flex-wrap: wrap;
+	align-items: flex-start;
+}
+
+/* 缩进体：子节点相对开括号缩进，带左侧竖线 */
+.es-json-body {
+	padding-left: 1.4rem;
+	border-left: 1px solid var(--background-modifier-border);
+	margin-left: 0.55rem;
+}
+
+/* +/- 折叠按钮 */
+.es-json-toggle {
+	flex-shrink: 0;
+	display: inline-block;
+	width: 1.2em;
+	text-align: center;
+	cursor: pointer;
+	color: var(--interactive-accent);
+	font-weight: 700;
+	user-select: none;
+	border-radius: 2px;
+	line-height: 1;
+}
+
+.es-json-toggle:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+/* JSON 键名 */
+.es-json-key {
+	color: var(--color-blue);
+	white-space: nowrap;
+}
+
+/* 冒号分隔符 */
+.es-json-colon {
+	color: var(--text-muted);
+	flex-shrink: 0;
+	padding-right: 0.15em;
+}
+
+/* 值：字符串 */
+.es-json-string {
+	color: var(--color-green);
+	word-break: break-word;
+}
+
+/* 值：数字 */
+.es-json-number {
+	color: var(--color-orange);
+}
+
+/* 值：boolean */
+.es-json-boolean {
+	color: var(--color-purple);
+}
+
+/* 值：null / undefined */
+.es-json-null {
+	color: var(--text-faint);
+	font-style: italic;
+}
+
+/* 括号符号 { } [ ] */
+.es-json-brace {
+	color: var(--text-muted);
+	font-weight: 600;
+}
+
+/* 折叠状态的省略提示 " ... }" */
+.es-json-collapsed-hint {
+	color: var(--text-faint);
+	font-style: italic;
+}
+
+/* 逗号 */
+.es-json-comma {
+	color: var(--text-muted);
+	flex-shrink: 0;
+}
+
+/* 长字符串：截断状态（默认） */
+.es-json-string-long {
+	cursor: pointer;
+	max-width: 36ch;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	display: inline-block;
+	vertical-align: bottom;
+	text-decoration: underline dotted var(--color-green);
+}
+
+/* 长字符串：展开状态（点击后） */
+.es-json-string-long.es-json-string-expanded {
+	white-space: pre-wrap;
+	word-break: break-all;
+	max-width: 100%;
+	text-overflow: unset;
+	overflow: visible;
+	text-decoration: none;
+}
+
+/* 弹窗底部工具栏（复制按钮） */
+.es-json-modal-footer {
+	display: flex;
+	justify-content: flex-end;
+	padding-top: 0.25rem;
+}
+
+/* ============================================================
+   Export Modal (es-export-modal)
+   ============================================================ */
+
+/* 格式说明文字 */
+.es-export-format-desc {
+	font-size: var(--font-small);
+	color: var(--text-muted);
+	margin: 0.25rem 0 0.75rem;
+	line-height: 1.5;
+	padding: 0.5rem 0.75rem;
+	background: var(--background-secondary);
+	border-radius: var(--radius-s);
+	border-left: 3px solid var(--interactive-accent);
+}
