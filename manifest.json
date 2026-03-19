@@ -1,7 +1,7 @@
 {
 	"id": "enhancement-suite",
 	"name": "Enhancement Suite",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"minAppVersion": "0.15.0",
 	"description": "A modular suite of enhancements for Obsidian: table sorting, YAML editing, export, and more.",
 	"author": "Lemon695",
