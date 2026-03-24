@@ -1,90 +1,79 @@
-# Obsidian Sample Plugin
+# Enhancement Suite
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+A modular Obsidian plugin that bundles four productivity enhancements into one lightweight, independently configurable package.
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+Each module can be toggled on or off from the settings panel. The plugin automatically switches between English and Simplified Chinese based on your Obsidian language setting.
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open modal (simple)" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+---
 
-## First time developing plugins?
+## Features
 
-Quick starting guide for new plugin devs:
+### Table Enhancement
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+- Sort any table column ascending or descending via command palette
+- Row filtering support (toggle in settings)
 
-## Releasing new releases
+### YAML / Frontmatter
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+- **Real-time validation** — highlights YAML syntax errors in the frontmatter as you type (300 ms debounce), with an actionable error message
+- **Frontmatter summary** — command that shows field count, key names, and any validation errors for the active note
+- **JSON Property Viewer** — in Reading View, object and array typed properties get a right-click copy menu and a click-to-open tree viewer modal (collapsible nodes, one-click JSON copy)
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+### Export
 
-## Adding your plugin to the community plugin list
+- Export the active note to **clean Markdown** (strips Obsidian-specific syntax such as wikilinks and callouts)
+- Export to **standalone HTML** (inline styles, no external dependencies — share a single file)
+- Trigger Obsidian's built-in **PDF export** directly from the command palette
+- Output files are saved to the vault root; filename collisions are avoided automatically by appending a timestamp
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+### Find & Replace
 
-## How to use
+- Full-featured search dialog with **case-sensitive** and **regex** toggles
+- Live preview of up to 50 matches with highlighted terms and line numbers
+- **Replace** (first match) or **Replace All** — replacements use the editor's native `replaceRange` API so they are fully undoable
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+---
 
-## Manually installing the plugin
+## Installation
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+### Community Plugin (recommended)
 
-## Improve code quality with eslint
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- This project already has eslint preconfigured, you can invoke a check by running`npm run lint`
-- Together with a custom eslint [plugin](https://github.com/obsidianmd/eslint-plugin) for Obsidan specific code guidelines.
-- A GitHub action is preconfigured to automatically lint every commit on all branches.
+1. Open **Settings → Community plugins → Browse**
+2. Search for **Enhancement Suite**
+3. Click **Install**, then **Enable**
 
-## Funding URL
+### Manual
 
-You can include funding URLs where people who use your plugin can financially support it.
+Copy `main.js`, `manifest.json`, and `styles.css` to:
 
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
-
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
+```
+<Vault>/.obsidian/plugins/enhancement-suite/
 ```
 
-If you have multiple URLs, you can also do:
+Reload Obsidian and enable the plugin under **Settings → Community plugins**.
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
+---
+
+## Requirements
+
+- Obsidian **0.15.0** or later
+- Works on desktop and mobile
+
+---
+
+## Development
+
+```bash
+npm install
+npm run dev     # watch mode (esbuild)
+npm run build   # production build (tsc type-check + esbuild)
+npm run lint    # ESLint
 ```
 
-## API Documentation
+The compiled `main.js` is **not** committed to this repository. Download it from the [Releases](../../releases) page or build it locally.
 
-See https://docs.obsidian.md
+---
+
+## License
+
+[MIT](LICENSE)

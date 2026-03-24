@@ -1,11 +1,10 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
-	"version": "1.0.0",
+	"id": "enhancement-suite",
+	"name": "Enhancement Suite",
+	"version": "1.0.1",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"description": "A modular suite of enhancements for Obsidian: table sorting, YAML editing, export, and more.",
+	"author": "Lemon695",
+	"authorUrl": "https://github.com/Lemon695",
 	"isDesktopOnly": false
 }
