@@ -117,6 +117,10 @@ export interface BaseModuleSettings {
 	formatOnSave: boolean;
 }
 
+/** Vault 模块暂无独立设置项。 */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface VaultModuleSettings {}
+
 // ---------------------------------------------------------------------------
 // Global plugin settings
 // ---------------------------------------------------------------------------
@@ -146,6 +150,7 @@ export interface PluginSettings {
 	progress: ProgressModuleSettings;
 	json: JsonModuleSettings;
 	base: BaseModuleSettings;
+	vault: VaultModuleSettings;
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -160,6 +165,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		progress: true,
 		json: true,
 		base: true,
+		vault: true,
 	},
 	table: {
 		enableSorting: true,
@@ -195,4 +201,5 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 	base: {
 		formatOnSave: false,
 	},
+	vault: {},
 };

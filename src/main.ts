@@ -12,6 +12,7 @@ import { CalloutModule } from './modules/callout';
 import { ProgressModule } from './modules/progress';
 import { JsonModule } from './modules/json';
 import { BaseModule } from './modules/base';
+import { VaultModule } from './modules/vault';
 
 /**
  * EnhancementSuitePlugin — the Obsidian plugin entry point.
@@ -49,6 +50,7 @@ export default class EnhancementSuitePlugin extends Plugin {
 		this.moduleManager.register(new ProgressModule(this));
 		this.moduleManager.register(new JsonModule(this));
 		this.moduleManager.register(new BaseModule(this));
+		this.moduleManager.register(new VaultModule(this));
 		// --------------------------------------------------------------------
 
 		await this.moduleManager.loadAll();
