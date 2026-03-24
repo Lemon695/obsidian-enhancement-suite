@@ -1,27 +1,39 @@
-import { App, Editor, MarkdownView, Modal, Notice, Setting } from 'obsidian';
+import { App, Editor, MarkdownView, Modal, Notice, Setting, TFile } from 'obsidian';
 import type EnhancementSuitePlugin from '../../main';
 import {
 	SearchMatch,
+	MultiFileMatch,
 	searchInContent,
 	applyReplacement,
+	searchInFiles,
+	searchAndReplaceInFile,
 } from './searcher';
 import { t } from '../../i18n/locale';
 import { replaceModalI18n } from '../../i18n/modules/replace/modal';
+
+type SearchScope = 'file' | 'folder' | 'vault';
 
 /**
  * 搜索替换对话框。
  *
  * 功能：
- *   - 在当前活跃笔记中搜索关键词
- *   - 支持大小写敏感和正则表达式
- *   - 显示匹配结果预览列表（最多 50 条）
- *   - 逐条替换（Replace）或一键全部替换（Replace All）
+ *   - 当前文件：在活跃笔记中搜索/替换（保留 Undo 历史）
+ *   - 当前文件夹 / 整个 Vault：跨文件搜索，结果按文件分组展示，
+ *     支持「替换此文件」和「全部替换」（使用 vault.modify()，不可撤销）
  *   - 大小写/正则选项与 ReplaceModuleSettings 双向同步
  */
 export class ReplaceModal extends Modal {
 	private searchTerm = '';
 	private replaceTerm = '';
+	private searchScope: SearchScope = 'file';
+
+	// 当前文件搜索结果
 	private matches: SearchMatch[] = [];
+	// 跨文件搜索结果
+	private multiFileResults: MultiFileMatch[] = [];
+
+	// 跨文件搜索防抖定时器
+	private multiSearchTimer: ReturnType<typeof setTimeout> | null = null;
 
 	// DOM 引用，在 onOpen() 后有效
 	private statusEl!: HTMLElement;
@@ -52,7 +64,6 @@ export class ReplaceModal extends Modal {
 						this.searchTerm = value;
 						this.runSearch();
 					});
-				// 自动聚焦
 				setTimeout(() => text.inputEl.focus(), 50);
 			});
 
@@ -92,6 +103,21 @@ export class ReplaceModal extends Modal {
 					})
 			);
 
+		// --- 搜索范围 ---
+		new Setting(contentEl)
+			.setName(i18n.scopeLabel)
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOption('file', i18n.scopeFile)
+					.addOption('folder', i18n.scopeFolder)
+					.addOption('vault', i18n.scopeVault)
+					.setValue(this.searchScope)
+					.onChange((value) => {
+						this.searchScope = value as SearchScope;
+						this.runSearch();
+					})
+			);
+
 		// --- 操作按钮 ---
 		new Setting(contentEl)
 			.addButton((btn) =>
@@ -112,11 +138,15 @@ export class ReplaceModal extends Modal {
 	}
 
 	onClose(): void {
+		if (this.multiSearchTimer !== null) {
+			clearTimeout(this.multiSearchTimer);
+			this.multiSearchTimer = null;
+		}
 		this.contentEl.empty();
 	}
 
 	// ---------------------------------------------------------------------------
-	// 私有方法
+	// 搜索
 	// ---------------------------------------------------------------------------
 
 	/** 获取当前活跃 MarkdownView 的 Editor，不存在则返回 null。 */
@@ -125,8 +155,17 @@ export class ReplaceModal extends Modal {
 		return view ? view.editor : null;
 	}
 
-	/** 执行搜索并刷新结果列表。 */
+	/** 根据当前 scope 分发搜索。 */
 	private runSearch(): void {
+		if (this.searchScope === 'file') {
+			this.runSingleFileSearch();
+		} else {
+			this.scheduleMultiFileSearch();
+		}
+	}
+
+	/** 当前文件搜索（同步）。 */
+	private runSingleFileSearch(): void {
 		const i18n = t(replaceModalI18n);
 		const editor = this.getEditor();
 		if (!editor) {
@@ -141,11 +180,76 @@ export class ReplaceModal extends Modal {
 			this.plugin.settings.replace
 		);
 
-		this.renderResults();
+		this.renderSingleFileResults();
 	}
 
-	/** 渲染搜索结果预览列表。 */
-	private renderResults(): void {
+	/** 跨文件搜索防抖调度（500ms）。 */
+	private scheduleMultiFileSearch(): void {
+		const i18n = t(replaceModalI18n);
+		this.statusEl.setText(i18n.searching);
+		this.resultsEl.empty();
+
+		if (this.multiSearchTimer !== null) {
+			clearTimeout(this.multiSearchTimer);
+		}
+		this.multiSearchTimer = setTimeout(() => {
+			this.multiSearchTimer = null;
+			this.runMultiFileSearch().catch((e) => {
+				console.error('[enhancement-suite] Multi-file search error:', e);
+			});
+		}, 500);
+	}
+
+	/** 跨文件搜索（异步）。 */
+	private async runMultiFileSearch(): Promise<void> {
+		const i18n = t(replaceModalI18n);
+
+		if (!this.searchTerm) {
+			this.statusEl.setText('');
+			this.resultsEl.empty();
+			return;
+		}
+
+		const files = this.getFilesForScope();
+		if (files === null) {
+			this.statusEl.setText(i18n.noActiveFolder);
+			this.resultsEl.empty();
+			return;
+		}
+
+		this.multiFileResults = await searchInFiles(
+			this.app,
+			files,
+			this.searchTerm,
+			this.plugin.settings.replace
+		);
+
+		this.renderMultiFileResults();
+	}
+
+	/**
+	 * 根据当前 scope 返回需要搜索的文件列表。
+	 * scope='folder' 时若无活跃文件则返回 null。
+	 */
+	private getFilesForScope(): TFile[] | null {
+		const allFiles = this.app.vault.getMarkdownFiles();
+
+		if (this.searchScope === 'vault') return allFiles;
+
+		// scope === 'folder'
+		const activeFile = this.app.workspace.getActiveFile();
+		if (!activeFile) return null;
+
+		const folderPath = activeFile.parent?.path ?? '/';
+		return allFiles.filter((f) => f.parent?.path === folderPath);
+	}
+
+	// ---------------------------------------------------------------------------
+	// 渲染结果
+	// ---------------------------------------------------------------------------
+
+	/** 渲染当前文件搜索结果（与原有逻辑一致）。 */
+	private renderSingleFileResults(): void {
 		const i18n = t(replaceModalI18n);
 		this.resultsEl.empty();
 
@@ -162,25 +266,9 @@ export class ReplaceModal extends Modal {
 
 		this.statusEl.setText(i18n.matchCount(count));
 
-		// 最多显示 50 条预览
 		const preview = this.matches.slice(0, 50);
 		for (const match of preview) {
-			const row = this.resultsEl.createDiv({ cls: 'es-replace-result-row' });
-
-			row.createSpan({
-				cls: 'es-replace-result-line',
-				text: `L${match.line + 1}`,
-			});
-
-			// 将匹配内容高亮显示
-			const before = match.lineText.slice(0, match.ch);
-			const highlight = match.matchText;
-			const after = match.lineText.slice(match.chEnd);
-
-			const textEl = row.createSpan({ cls: 'es-replace-result-text' });
-			textEl.appendText(before);
-			textEl.createSpan({ cls: 'es-replace-highlight', text: highlight });
-			textEl.appendText(after);
+			this.appendMatchRow(this.resultsEl, match);
 		}
 
 		if (count > 50) {
@@ -191,12 +279,106 @@ export class ReplaceModal extends Modal {
 		}
 	}
 
+	/** 渲染跨文件搜索结果（按文件分组）。 */
+	private renderMultiFileResults(): void {
+		const i18n = t(replaceModalI18n);
+		this.resultsEl.empty();
+
+		if (!this.searchTerm) {
+			this.statusEl.setText('');
+			return;
+		}
+
+		if (this.multiFileResults.length === 0) {
+			this.statusEl.setText(i18n.noMatchesFound);
+			return;
+		}
+
+		const totalMatches = this.multiFileResults.reduce(
+			(sum, r) => sum + r.matches.length,
+			0
+		);
+		const fileCount = this.multiFileResults.length;
+		this.statusEl.setText(i18n.foundInFiles(fileCount, totalMatches));
+
+		for (const result of this.multiFileResults) {
+			// 文件组标题 + 「替换此文件」按钮
+			const groupHeader = this.resultsEl.createDiv({
+				cls: 'es-replace-file-header',
+			});
+			groupHeader.createSpan({
+				cls: 'es-replace-file-name',
+				text: i18n.fileGroupHeader(result.file.path, result.matches.length),
+			});
+			const replaceBtn = groupHeader.createEl('button', {
+				cls: 'es-replace-file-btn',
+				text: i18n.replaceInFileBtn,
+			});
+			replaceBtn.addEventListener('click', () => {
+				this.replaceInFile(result.file).catch(console.error);
+			});
+
+			// 该文件的前 10 条匹配预览
+			const preview = result.matches.slice(0, 10);
+			for (const match of preview) {
+				this.appendMatchRow(this.resultsEl, match);
+			}
+			if (result.matches.length > 10) {
+				this.resultsEl.createDiv({
+					cls: 'es-replace-overflow',
+					text: i18n.overflowHint(result.matches.length - 10),
+				});
+			}
+		}
+
+		// 底部「全部替换」按钮
+		if (this.multiFileResults.length > 0) {
+			const footerEl = this.resultsEl.createDiv({ cls: 'es-replace-multi-footer' });
+			const replaceAllBtn = footerEl.createEl('button', {
+				cls: 'mod-cta',
+				text: i18n.replaceAllFilesBtn,
+			});
+			replaceAllBtn.addEventListener('click', () => {
+				this.replaceAllFiles().catch(console.error);
+			});
+		}
+	}
+
+	/** 向容器追加一条匹配结果行（行号 + 高亮文本）。 */
+	private appendMatchRow(container: HTMLElement, match: SearchMatch): void {
+		const row = container.createDiv({ cls: 'es-replace-result-row' });
+
+		row.createSpan({
+			cls: 'es-replace-result-line',
+			text: `L${match.line + 1}`,
+		});
+
+		const before = match.lineText.slice(0, match.ch);
+		const after = match.lineText.slice(match.chEnd);
+
+		const textEl = row.createSpan({ cls: 'es-replace-result-text' });
+		textEl.appendText(before);
+		textEl.createSpan({ cls: 'es-replace-highlight', text: match.matchText });
+		textEl.appendText(after);
+	}
+
+	// ---------------------------------------------------------------------------
+	// 替换操作
+	// ---------------------------------------------------------------------------
+
 	/**
-	 * 替换第一个匹配项，然后重新搜索。
+	 * 替换第一个匹配项（当前文件，scope=file）。
 	 * 使用 editor.replaceRange() 以保留 Undo 历史。
 	 */
 	private replaceNext(): void {
 		const i18n = t(replaceModalI18n);
+
+		if (this.searchScope !== 'file') {
+			// 跨文件模式下「替换」按钮无意义，提示用户使用每组的「替换此文件」
+			new Notice(i18n.noMatchesReplace);
+			return;
+		}
+
 		const editor = this.getEditor();
 		const match = this.matches[0];
 		if (!editor || !match) {
@@ -215,10 +397,18 @@ export class ReplaceModal extends Modal {
 	}
 
 	/**
-	 * 替换所有匹配项。
-	 * 从后向前调用 editor.replaceRange() 以保证偏移量不失效。
+	 * 替换所有匹配项（scope=file：editor API；scope=folder/vault：vault.modify()）。
 	 */
 	private replaceAll(): void {
+		if (this.searchScope === 'file') {
+			this.replaceAllSingleFile();
+		} else {
+			this.replaceAllFiles().catch(console.error);
+		}
+	}
+
+	/** 当前文件全部替换（editor API，保留 Undo 历史）。 */
+	private replaceAllSingleFile(): void {
 		const i18n = t(replaceModalI18n);
 		const editor = this.getEditor();
 		if (!editor || this.matches.length === 0) {
@@ -228,7 +418,6 @@ export class ReplaceModal extends Modal {
 
 		const count = this.matches.length;
 
-		// 从后向前替换，避免偏移量漂移
 		for (let i = this.matches.length - 1; i >= 0; i--) {
 			const match = this.matches[i];
 			if (!match) continue;
@@ -240,7 +429,62 @@ export class ReplaceModal extends Modal {
 		}
 
 		this.matches = [];
-		this.renderResults();
+		this.renderSingleFileResults();
+		new Notice(i18n.replacedCount(count));
+	}
+
+	/** 跨文件全部替换（vault.modify()，不可撤销）。 */
+	private async replaceAllFiles(): Promise<void> {
+		const i18n = t(replaceModalI18n);
+
+		if (this.multiFileResults.length === 0) {
+			new Notice(i18n.noMatchesReplace);
+			return;
+		}
+
+		const fileCount = this.multiFileResults.length;
+		const warning = i18n.replaceAllFilesWarning(fileCount);
+		if (!window.confirm(warning)) return;
+
+		let totalReplaced = 0;
+		let replacedFiles = 0;
+
+		for (const result of this.multiFileResults) {
+			const count = await searchAndReplaceInFile(
+				this.app,
+				result.file,
+				this.searchTerm,
+				this.replaceTerm,
+				this.plugin.settings.replace
+			);
+			if (count > 0) {
+				totalReplaced += count;
+				replacedFiles++;
+			}
+		}
+
+		this.multiFileResults = [];
+		this.renderMultiFileResults();
+		new Notice(i18n.replacedInFiles(replacedFiles, totalReplaced));
+	}
+
+	/** 替换单个文件（跨文件模式每组的「替换此文件」按钮）。 */
+	private async replaceInFile(file: TFile): Promise<void> {
+		const i18n = t(replaceModalI18n);
+
+		const count = await searchAndReplaceInFile(
+			this.app,
+			file,
+			this.searchTerm,
+			this.replaceTerm,
+			this.plugin.settings.replace
+		);
+
+		// 从结果中移除已替换的文件
+		this.multiFileResults = this.multiFileResults.filter(
+			(r) => r.file.path !== file.path
+		);
+		this.renderMultiFileResults();
 		new Notice(i18n.replacedCount(count));
 	}
 }

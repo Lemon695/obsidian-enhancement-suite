@@ -5,6 +5,7 @@ interface ExportSettingsI18n {
 	formatMarkdown: string;
 	formatHtml: string;
 	formatPdf: string;
+	embedImages: { name: string; desc: string };
 }
 
 export const exportSettingsI18n: I18nDict<ExportSettingsI18n> = {
@@ -16,6 +17,10 @@ export const exportSettingsI18n: I18nDict<ExportSettingsI18n> = {
 		formatMarkdown: 'Markdown',
 		formatHtml: 'HTML',
 		formatPdf: 'PDF',
+		embedImages: {
+			name: '导出时内嵌图片',
+			desc: '导出 HTML 时将 vault 内的图片转为 Base64 内嵌，实现真正的单文件交付（默认关闭）。',
+		},
 	},
 	en: {
 		defaultFormat: {
@@ -25,5 +30,9 @@ export const exportSettingsI18n: I18nDict<ExportSettingsI18n> = {
 		formatMarkdown: 'Markdown',
 		formatHtml: 'HTML',
 		formatPdf: 'PDF',
+		embedImages: {
+			name: 'Embed images in HTML',
+			desc: 'Convert vault images to Base64 data URIs when exporting HTML, producing a fully self-contained file. Off by default.',
+		},
 	},
 };

@@ -8,6 +8,7 @@ import {
 	hasFrontmatter,
 } from './frontmatter';
 import { PropertyEnhancer } from './property-enhancer';
+import { BatchPropertyModal } from './batch-property-modal';
 import { t } from '../../i18n/locale';
 import { yamlModuleI18n } from '../../i18n/modules/yaml/module';
 import { yamlSettingsI18n } from '../../i18n/modules/yaml/settings';
@@ -158,6 +159,15 @@ export class YamlModule implements PluginModule {
 				if (!view) return false;
 				if (!checking) this.validateCurrentFile(view, true);
 				return true;
+			},
+		});
+
+		this.plugin.addCommand({
+			id: 'yaml-batch-edit-property',
+			name: i18n.batchEditProperty.name,
+			callback: () => {
+				const activeFile = this.plugin.app.workspace.getActiveFile();
+				new BatchPropertyModal(this.plugin.app, activeFile).open();
 			},
 		});
 	}

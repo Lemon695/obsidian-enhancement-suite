@@ -1,11 +1,14 @@
 /**
- * 导出格式化工具函数（纯函数，无 Obsidian 依赖，可单元测试）。
+ * 导出格式化工具函数。
  *
  * 职责：
  *   - cleanMarkdownForExport  — 清理 Obsidian 专有语法，生成标准 Markdown
  *   - markdownToHtml          — 将 Markdown 转换为独立 HTML 文档
+ *   - embedImages             — 将 HTML 内 vault 图片替换为 Base64 data URI（需 Obsidian App）
  *   - escapeHtml              — HTML 特殊字符转义
  */
+
+import { App, TFile } from 'obsidian';
 
 // ---------------------------------------------------------------------------
 // Markdown 清理
@@ -162,6 +165,62 @@ ${body}
 }
 
 // ---------------------------------------------------------------------------
+// 图片内嵌（Base64 data URI）
+// ---------------------------------------------------------------------------
+
+/**
+ * 将 HTML 中 vault 路径的 `<img src="...">` 替换为 Base64 data URI。
+ *
+ * 跳过 http / https / data: 开头的 src（外部资源或已内嵌的资源）。
+ * 读取失败时保留原始 src，不中断整体导出流程。
+ *
+ * @param html  由 markdownToHtml() 生成的 HTML 字符串
+ * @param app   Obsidian App 实例（用于 vault.readBinary()）
+ */
+export async function embedImages(html: string, app: App): Promise<string> {
+	const imgPattern = /<img([^>]*?)src="([^"]+)"([^>]*?)>/g;
+	const tasks: Array<{ fullTag: string; src: string }> = [];
+
+	let m: RegExpExecArray | null;
+	while ((m = imgPattern.exec(html)) !== null) {
+		const src = m[2];
+		if (
+			src &&
+			!src.startsWith('http://') &&
+			!src.startsWith('https://') &&
+			!src.startsWith('data:')
+		) {
+			tasks.push({ fullTag: m[0] ?? '', src });
+		}
+	}
+
+	if (tasks.length === 0) return html;
+
+	let result = html;
+
+	for (const { fullTag, src } of tasks) {
+		try {
+			const filePath = decodeURIComponent(src);
+			const abstractFile = app.vault.getAbstractFileByPath(filePath);
+			if (!(abstractFile instanceof TFile)) continue;
+
+			const binary = await app.vault.readBinary(abstractFile);
+			const mimeType = guessMimeType(abstractFile.extension);
+			const base64 = arrayBufferToBase64(binary);
+			const dataUri = `data:${mimeType};base64,${base64}`;
+
+			// 仅替换 src 属性值，保留其余 img 属性
+			const newTag = fullTag.replace(`src="${src}"`, `src="${dataUri}"`);
+			result = result.replace(fullTag, newTag);
+		} catch {
+			// 读取失败：保留原始 src，继续处理其余图片
+		}
+	}
+
+	return result;
+}
+
+// ---------------------------------------------------------------------------
 // 辅助函数
 // ---------------------------------------------------------------------------
 
@@ -173,4 +232,37 @@ export function escapeHtml(s: string): string {
 		.replace(/>/g, '&gt;')
 		.replace(/"/g, '&quot;')
 		.replace(/'/g, '&#39;');
+}
+
+/** 根据文件扩展名推断 MIME 类型。 */
+function guessMimeType(ext: string): string {
+	switch (ext.toLowerCase()) {
+		case 'jpg':
+		case 'jpeg':
+			return 'image/jpeg';
+		case 'gif':
+			return 'image/gif';
+		case 'webp':
+			return 'image/webp';
+		case 'svg':
+			return 'image/svg+xml';
+		case 'bmp':
+			return 'image/bmp';
+		case 'avif':
+			return 'image/avif';
+		default:
+			return 'image/png';
+	}
+}
+
+/** 将 ArrayBuffer 转换为 Base64 编码字符串（分块处理，防止栈溢出）。 */
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+	const bytes = new Uint8Array(buffer);
+	let binary = '';
+	const chunkSize = 8192;
+	for (let i = 0; i < bytes.length; i += chunkSize) {
+		const chunk = Array.from(bytes.subarray(i, i + chunkSize));
+		binary += String.fromCharCode(...chunk);
+	}
+	return btoa(binary);
 }

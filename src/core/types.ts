@@ -72,11 +72,44 @@ export interface YamlModuleSettings {
 
 export interface ExportModuleSettings {
 	defaultFormat: 'markdown' | 'html' | 'pdf';
+	/** 导出 HTML 时将 vault 内图片转为 Base64 data URI 内嵌（默认关闭）。 */
+	embedImages: boolean;
 }
 
 export interface ReplaceModuleSettings {
 	caseSensitive: boolean;
 	useRegex: boolean;
+}
+
+export interface StatsModuleSettings {
+	/** 中文阅读速度：字/分钟，默认 300。 */
+	chineseReadingSpeed: number;
+	/** 英文阅读速度：词/分钟，默认 200。 */
+	englishReadingSpeed: number;
+}
+
+/** Footnotes 模块暂无独立设置项。 */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface FootnotesModuleSettings {}
+
+/** Callout 模块暂无独立设置项。 */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface CalloutModuleSettings {}
+
+export interface ProgressModuleSettings {
+	/** 进度条高度（像素），默认 3。 */
+	barHeightPx: number;
+	/** 进度条颜色（CSS 颜色值），默认 var(--color-accent)。 */
+	barColor: string;
+}
+
+export interface JsonModuleSettings {
+	/** 在阅读模式下增强 Markdown 中的 JSON 代码块（默认 true）。 */
+	enableCodeBlockEnhancer: boolean;
+	/**
+	 * 在源码编辑模式下，保存时自动将 JSON 格式化为 2 格缩进（默认 false）。
+	 */
+	formatOnSave: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -102,6 +135,11 @@ export interface PluginSettings {
 	yaml: YamlModuleSettings;
 	export: ExportModuleSettings;
 	replace: ReplaceModuleSettings;
+	stats: StatsModuleSettings;
+	footnotes: FootnotesModuleSettings;
+	callout: CalloutModuleSettings;
+	progress: ProgressModuleSettings;
+	json: JsonModuleSettings;
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -110,6 +148,11 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		yaml: true,
 		export: true,
 		replace: true,
+		stats: true,
+		footnotes: true,
+		callout: true,
+		progress: true,
+		json: true,
 	},
 	table: {
 		enableSorting: true,
@@ -122,9 +165,24 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 	},
 	export: {
 		defaultFormat: 'markdown',
+		embedImages: false,
 	},
 	replace: {
 		caseSensitive: false,
 		useRegex: false,
+	},
+	stats: {
+		chineseReadingSpeed: 300,
+		englishReadingSpeed: 200,
+	},
+	footnotes: {},
+	callout: {},
+	progress: {
+		barHeightPx: 3,
+		barColor: 'var(--color-accent)',
+	},
+	json: {
+		enableCodeBlockEnhancer: true,
+		formatOnSave: false,
 	},
 };

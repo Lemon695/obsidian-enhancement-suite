@@ -6,6 +6,11 @@ import { TableModule } from './modules/table';
 import { YamlModule } from './modules/yaml';
 import { ExportModule } from './modules/export';
 import { ReplaceModule } from './modules/replace';
+import { StatsModule } from './modules/stats';
+import { FootnotesModule } from './modules/footnotes';
+import { CalloutModule } from './modules/callout';
+import { ProgressModule } from './modules/progress';
+import { JsonModule } from './modules/json';
 
 /**
  * EnhancementSuitePlugin — the Obsidian plugin entry point.
@@ -37,6 +42,11 @@ export default class EnhancementSuitePlugin extends Plugin {
 		this.moduleManager.register(new YamlModule(this));
 		this.moduleManager.register(new ExportModule(this));
 		this.moduleManager.register(new ReplaceModule(this));
+		this.moduleManager.register(new StatsModule(this));
+		this.moduleManager.register(new FootnotesModule(this));
+		this.moduleManager.register(new CalloutModule(this));
+		this.moduleManager.register(new ProgressModule(this));
+		this.moduleManager.register(new JsonModule(this));
 		// --------------------------------------------------------------------
 
 		await this.moduleManager.loadAll();

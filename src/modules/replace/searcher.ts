@@ -1,8 +1,11 @@
 /**
- * 搜索与替换的纯函数工具库。
+ * 搜索与替换的工具库。
  *
- * 本文件不依赖任何 Obsidian API，所有函数均可在单元测试中直接调用。
+ * searchInContent / applyReplacement — 纯函数，无 Obsidian 依赖，可单元测试。
+ * searchInFiles / searchAndReplaceInFile — 依赖 Obsidian App，用于跨文件操作。
  */
+
+import { App, TFile } from 'obsidian';
 
 // ---------------------------------------------------------------------------
 // 类型定义
@@ -30,8 +33,14 @@ export interface SearchOptions {
 	useRegex: boolean;
 }
 
+/** 跨文件搜索的单文件结果。 */
+export interface MultiFileMatch {
+	file: TFile;
+	matches: SearchMatch[];
+}
+
 // ---------------------------------------------------------------------------
-// 搜索
+// 搜索（纯函数）
 // ---------------------------------------------------------------------------
 
 /**
@@ -89,7 +98,7 @@ export function searchInContent(
 }
 
 // ---------------------------------------------------------------------------
-// 替换
+// 替换（纯函数）
 // ---------------------------------------------------------------------------
 
 /**
@@ -110,6 +119,63 @@ export function applyReplacement(
 		result = result.slice(0, match.from) + replacement + result.slice(match.to);
 	}
 	return result;
+}
+
+// ---------------------------------------------------------------------------
+// 跨文件搜索（需要 Obsidian App）
+// ---------------------------------------------------------------------------
+
+/**
+ * 在多个文件中搜索 `term`，返回有匹配的文件列表（每项含匹配详情）。
+ *
+ * 对每个文件调用 `vault.read()` 再用 `searchInContent()` 处理。
+ * 无匹配的文件不出现在结果中。
+ */
+export async function searchInFiles(
+	app: App,
+	files: TFile[],
+	term: string,
+	options: SearchOptions
+): Promise<MultiFileMatch[]> {
+	if (!term) return [];
+
+	const results: MultiFileMatch[] = [];
+
+	for (const file of files) {
+		try {
+			const content = await app.vault.read(file);
+			const matches = searchInContent(content, term, options);
+			if (matches.length > 0) {
+				results.push({ file, matches });
+			}
+		} catch {
+			// 读取失败：跳过该文件
+		}
+	}
+
+	return results;
+}
+
+/**
+ * 在单个文件中执行原子化搜索替换（read → match → replace → write）。
+ *
+ * 不使用预先计算的 match 偏移量，而是实时重算，避免偏移漂移问题。
+ * 返回实际替换次数；若无匹配则返回 0，文件不被修改。
+ */
+export async function searchAndReplaceInFile(
+	app: App,
+	file: TFile,
+	term: string,
+	replacement: string,
+	options: SearchOptions
+): Promise<number> {
+	const content = await app.vault.read(file);
+	const matches = searchInContent(content, term, options);
+	if (matches.length === 0) return 0;
+
+	const newContent = applyReplacement(content, matches, replacement);
+	await app.vault.modify(file, newContent);
+	return matches.length;
 }
 
 // ---------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 import { App, Modal, Notice, Setting, TFile } from 'obsidian';
 import type EnhancementSuitePlugin from '../../main';
-import { cleanMarkdownForExport, markdownToHtml } from './formatter';
+import { cleanMarkdownForExport, markdownToHtml, embedImages } from './formatter';
 import { t } from '../../i18n/locale';
 import { exportModalI18n } from '../../i18n/modules/export/modal';
 
@@ -118,10 +118,15 @@ export class ExportModal extends Modal {
 		new Notice(t(exportModalI18n).exportedTo(outputPath));
 	}
 
-	/** 导出为 HTML 文件。 */
+	/** 导出为 HTML 文件（可选：内嵌图片为 Base64）。 */
 	private async exportHtml(content: string): Promise<void> {
 		const cleaned = cleanMarkdownForExport(content);
-		const html = markdownToHtml(this.file.basename, cleaned);
+		let html = markdownToHtml(this.file.basename, cleaned);
+
+		if (this.plugin.settings.export.embedImages) {
+			html = await embedImages(html, this.app);
+		}
+
 		const outputPath = this.resolveOutputPath(`${this.file.basename}-export.html`);
 		await this.app.vault.create(outputPath, html);
 		new Notice(t(exportModalI18n).exportedTo(outputPath));

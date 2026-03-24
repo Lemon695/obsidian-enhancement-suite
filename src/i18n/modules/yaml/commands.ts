@@ -3,6 +3,7 @@ import type { I18nDict } from '../../locale';
 interface YamlCommandsI18n {
 	showSummary: { name: string };
 	validate: { name: string };
+	batchEditProperty: { name: string };
 
 	/** Notice: no frontmatter detected (validate command). */
 	noFrontmatter: string;
@@ -29,6 +30,7 @@ export const yamlCommandsI18n: I18nDict<YamlCommandsI18n> = {
 	zh: {
 		showSummary: { name: 'YAML：显示 frontmatter 摘要' },
 		validate: { name: 'YAML：验证 frontmatter' },
+		batchEditProperty: { name: 'YAML：批量编辑属性' },
 
 		noFrontmatter: '当前笔记中没有 frontmatter。',
 		notClosed: 'Frontmatter 块未正确关闭。',
@@ -44,6 +46,7 @@ export const yamlCommandsI18n: I18nDict<YamlCommandsI18n> = {
 	en: {
 		showSummary: { name: 'YAML: Show frontmatter summary' },
 		validate: { name: 'YAML: Validate frontmatter' },
+		batchEditProperty: { name: 'YAML: Batch edit properties' },
 
 		noFrontmatter: 'No frontmatter found in this note.',
 		notClosed: 'Frontmatter block is not properly closed.',

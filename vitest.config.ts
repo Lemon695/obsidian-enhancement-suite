@@ -1,12 +1,21 @@
 import { defineConfig } from 'vitest/config';
+import path from 'path';
 
 /**
  * Vitest 配置。
  *
  * 只测试无 Obsidian 依赖的纯函数（searcher.ts / frontmatter.ts / formatter.ts）。
  * Obsidian API 依赖的代码（Modal、Plugin 等）不在单元测试范围内。
+ *
+ * obsidian 包由 esbuild 在构建时外部化，vitest 无法解析，
+ * 故通过 resolve.alias 将其指向最小化 mock（src/__mocks__/obsidian.ts）。
  */
 export default defineConfig({
+	resolve: {
+		alias: {
+			obsidian: path.resolve(__dirname, 'src/__mocks__/obsidian.ts'),
+		},
+	},
 	test: {
 		// Node 环境即可，无需 DOM
 		environment: 'node',

@@ -271,3 +271,245 @@
 	border-radius: var(--radius-s);
 	border-left: 3px solid var(--interactive-accent);
 }
+
+/* ============================================================
+   Replace Modal — 跨文件搜索结果
+   ============================================================ */
+
+/* 文件分组标题行 */
+.es-replace-file-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0.3rem 0.5rem;
+	background: var(--background-secondary);
+	border-bottom: 1px solid var(--background-modifier-border);
+	gap: 0.5rem;
+}
+
+/* 文件路径文字 */
+.es-replace-file-name {
+	font-size: var(--font-small);
+	font-weight: 600;
+	color: var(--text-muted);
+	flex: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* 「替换此文件」按钮 */
+.es-replace-file-btn {
+	flex-shrink: 0;
+	font-size: var(--font-smaller);
+}
+
+/* 跨文件「全部替换」底部工具栏 */
+.es-replace-multi-footer {
+	display: flex;
+	justify-content: flex-end;
+	padding: 0.4rem 0.5rem;
+	border-top: 1px solid var(--background-modifier-border);
+	background: var(--background-secondary);
+}
+
+/* ============================================================
+   Batch Property Modal (es-batch-property-modal)
+   ============================================================ */
+
+/* 预览行：将修改 N 个文件 */
+.es-batch-preview {
+	font-size: var(--font-small);
+	color: var(--text-muted);
+	padding: 0.3rem 0.5rem 0.5rem;
+	font-style: italic;
+}
+
+/* ============================================================
+   Reading Progress Bar (es-progress-bar)
+   ============================================================ */
+
+/*
+ * 阅读进度条 — 作为 .markdown-preview-view 的第一个子元素注入。
+ * position:sticky; top:0 使其在滚动时始终固定在可视区域顶部。
+ * width 通过 JS 动态更新（0% → 100%）。
+ * height 与 background-color 通过 style 属性由 ProgressModule 控制。
+ */
+.es-progress-bar {
+	position: sticky;
+	top: 0;
+	left: 0;
+	width: 0%;
+	z-index: 100;
+	pointer-events: none;
+	transition: width 80ms linear;
+	/* 用负 margin-bottom 抵消自身高度，避免影响内容布局 */
+	margin-bottom: -3px;
+}
+
+/* ============================================================
+   JSON File View (es-json-file-*)
+   ============================================================ */
+
+/* 整体视图容器：flex 纵向布局 */
+.es-json-file-view {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+}
+
+/* ── 工具栏 ──────────────────────────────────────────────── */
+.es-json-file-toolbar {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.4rem 0.75rem;
+	border-bottom: 1px solid var(--background-modifier-border);
+	flex-shrink: 0;
+	flex-wrap: wrap;
+}
+
+/* 模式切换按钮组 */
+.es-json-file-mode-group {
+	display: flex;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	overflow: hidden;
+}
+
+.es-json-file-mode-btn {
+	padding: 0.2rem 0.65rem;
+	font-size: var(--font-small);
+	background: transparent;
+	border: none;
+	cursor: pointer;
+	color: var(--text-muted);
+	transition: background-color 0.1s ease, color 0.1s ease;
+}
+
+.es-json-file-mode-btn:not(:last-child) {
+	border-right: 1px solid var(--background-modifier-border);
+}
+
+.es-json-file-mode-btn.is-active {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.es-json-file-mode-btn:not(.is-active):hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+/* 格式化按钮 */
+.es-json-file-format-btn {
+	font-size: var(--font-small);
+	padding: 0.2rem 0.65rem;
+}
+
+/* 校验状态指示 */
+.es-json-file-status {
+	font-size: var(--font-small);
+	font-weight: 600;
+	margin-left: auto;
+	white-space: nowrap;
+}
+
+.es-json-status-valid {
+	color: var(--color-green);
+}
+
+.es-json-status-invalid {
+	color: var(--color-red);
+}
+
+/* ── 主体（树形 / 源码二选一） ──────────────────────────── */
+.es-json-file-body {
+	flex: 1;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+}
+
+/* 树形容器：内嵌复用 es-json-tree 样式，取消圆角以铺满视图 */
+.es-json-file-tree-inner {
+	flex: 1;
+	max-height: none;        /* 覆盖 .es-json-tree 的 62vh 限制 */
+	border-radius: 0;
+	margin-bottom: 0;
+	background: var(--background-primary);
+}
+
+/* 无效 JSON 错误提示 */
+.es-json-file-error {
+	font-family: var(--font-monospace);
+	font-size: var(--font-small);
+	color: var(--color-red);
+	padding: 1rem;
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+/* 源码编辑区 */
+.es-json-file-source {
+	flex: 1;
+	width: 100%;
+	height: 100%;
+	resize: none;
+	font-family: var(--font-monospace);
+	font-size: var(--font-small);
+	line-height: 1.6;
+	padding: 0.75rem 1rem;
+	background: var(--background-primary);
+	color: var(--text-normal);
+	border: none;
+	outline: none;
+	box-sizing: border-box;
+}
+
+/* ── 状态栏 ─────────────────────────────────────────────── */
+.es-json-file-statusbar {
+	flex-shrink: 0;
+	padding: 0.2rem 0.75rem;
+	font-size: var(--font-smaller);
+	color: var(--text-faint);
+	border-top: 1px solid var(--background-modifier-border);
+	background: var(--background-secondary);
+	text-align: right;
+}
+
+/* ============================================================
+   JSON Code Block Enhancer (es-json-code-block-btn)
+   ============================================================ */
+
+/* 代码块容器需要 position:relative（由 JS 注入） */
+
+/* 「查看 JSON」按钮：悬浮在代码块右上角 */
+.es-json-code-block-btn {
+	position: absolute;
+	top: 0.4rem;
+	right: 0.4rem;
+	font-size: var(--font-smaller);
+	padding: 0.1rem 0.45rem;
+	border-radius: var(--radius-s);
+	background: var(--background-modifier-hover);
+	color: var(--text-muted);
+	border: 1px solid var(--background-modifier-border);
+	cursor: pointer;
+	opacity: 0;
+	transition: opacity 0.15s ease;
+	z-index: 1;
+}
+
+/* 鼠标悬浮代码块时显示按钮 */
+pre:hover .es-json-code-block-btn,
+.es-json-code-block-btn:focus {
+	opacity: 1;
+}
+
+.es-json-code-block-btn:hover {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border-color: transparent;
+}

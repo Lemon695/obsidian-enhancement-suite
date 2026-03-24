@@ -1,7 +1,7 @@
 {
 	"name": "enhancement-suite",
-	"version": "1.0.0",
-	"description": "A modular suite of enhancements for Obsidian: table sorting, YAML editing, export, and more.",
+	"version": "1.1.0",
+	"description": "A modular suite of enhancements for Obsidian: tables, YAML, export, replace, JSON, stats, callouts, footnotes, and reading progress.",
 	"main": "main.js",
 	"type": "module",
 	"scripts": {
