@@ -513,3 +513,217 @@ pre:hover .es-json-code-block-btn,
 	color: var(--text-on-accent);
 	border-color: transparent;
 }
+
+/* ===========================================================================
+   Base File View (es-base-*)
+   =========================================================================== */
+
+.es-base-file-view {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+}
+
+.es-base-file-toolbar {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 10px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	flex-shrink: 0;
+}
+
+.es-base-file-mode-group {
+	display: flex;
+	gap: 2px;
+}
+
+.es-base-file-mode-btn {
+	padding: 2px 10px;
+	font-size: var(--font-ui-smaller);
+	border-radius: var(--radius-s);
+	border: 1px solid var(--background-modifier-border);
+	background: transparent;
+	color: var(--text-muted);
+	cursor: pointer;
+}
+
+.es-base-file-mode-btn.is-active {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border-color: transparent;
+}
+
+.es-base-file-mode-btn:hover:not(.is-active) {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.es-base-file-format-btn {
+	padding: 2px 10px;
+	font-size: var(--font-ui-smaller);
+	border-radius: var(--radius-s);
+	cursor: pointer;
+}
+
+.es-base-file-status {
+	margin-left: auto;
+	font-size: var(--font-ui-smaller);
+	font-weight: 500;
+}
+
+.es-base-status-valid {
+	color: var(--color-green);
+}
+
+.es-base-status-invalid {
+	color: var(--color-red);
+}
+
+.es-base-file-body {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	position: relative;
+}
+
+.es-base-file-tree-inner {
+	flex: 1;
+	min-height: 0;
+	overflow: auto;
+	padding: 12px 16px;
+	max-height: none;        /* 覆盖 .es-json-tree 的 62vh 限制 */
+	border-radius: 0;        /* 覆盖 .es-json-tree 的圆角 */
+	margin-bottom: 0;        /* 覆盖 .es-json-tree 的 margin */
+	background: var(--background-primary);
+}
+
+.es-base-file-error {
+	padding: 12px 16px;
+	color: var(--color-red);
+	font-family: var(--font-monospace);
+	font-size: var(--font-ui-small);
+}
+
+.es-base-file-source {
+	flex: 1;
+	min-height: 0;
+	width: 100%;
+	padding: 12px 16px;
+	resize: none;
+	border: none;
+	outline: none;
+	background: var(--background-primary);
+	color: var(--text-normal);
+	font-family: var(--font-monospace);
+	font-size: var(--font-ui-small);
+	box-sizing: border-box;
+}
+
+.es-base-file-statusbar {
+	padding: 2px 12px;
+	font-size: var(--font-ui-smaller);
+	color: var(--text-faint);
+	border-top: 1px solid var(--background-modifier-border);
+	flex-shrink: 0;
+}
+
+/* Search / Replace bar */
+.es-base-search-bar {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 6px 10px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	background: var(--background-secondary);
+	flex-shrink: 0;
+}
+
+.es-base-search-bar--hidden {
+	display: none;
+}
+
+.es-base-search-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.es-base-search-input {
+	flex: 1;
+	min-width: 0;
+	height: 26px;
+	padding: 2px 8px;
+	font-size: var(--font-ui-smaller);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	background: var(--background-primary);
+	color: var(--text-normal);
+	outline: none;
+}
+
+.es-base-search-input:focus {
+	border-color: var(--interactive-accent);
+}
+
+.es-base-search-btn {
+	padding: 2px 8px;
+	height: 26px;
+	font-size: var(--font-ui-smaller);
+	border-radius: var(--radius-s);
+	border: 1px solid var(--background-modifier-border);
+	background: transparent;
+	color: var(--text-muted);
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.es-base-search-btn:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.es-base-search-count {
+	min-width: 60px;
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
+	text-align: center;
+}
+
+.es-base-search-count.es-base-search-no-match {
+	color: var(--color-red);
+}
+
+.es-base-search-close {
+	padding: 2px 6px;
+	height: 26px;
+	font-size: var(--font-ui-smaller);
+	border-radius: var(--radius-s);
+	border: none;
+	background: transparent;
+	color: var(--text-muted);
+	cursor: pointer;
+}
+
+.es-base-search-close:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+/* 树形视图搜索高亮 */
+mark.es-base-tree-highlight {
+	background: var(--text-highlight-bg, rgba(255, 213, 0, 0.4));
+	color: inherit;
+	border-radius: 2px;
+	padding: 0;
+}
+
+mark.es-base-tree-highlight--current {
+	background: var(--color-orange, #f6a623);
+	color: var(--text-on-accent, #fff);
+	border-radius: 2px;
+	padding: 0;
+}

@@ -112,6 +112,11 @@ export interface JsonModuleSettings {
 	formatOnSave: boolean;
 }
 
+export interface BaseModuleSettings {
+	/** 在源码编辑模式下，保存时自动将 .base 文件格式化（默认 false）。 */
+	formatOnSave: boolean;
+}
+
 // ---------------------------------------------------------------------------
 // Global plugin settings
 // ---------------------------------------------------------------------------
@@ -140,6 +145,7 @@ export interface PluginSettings {
 	callout: CalloutModuleSettings;
 	progress: ProgressModuleSettings;
 	json: JsonModuleSettings;
+	base: BaseModuleSettings;
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -153,6 +159,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		callout: true,
 		progress: true,
 		json: true,
+		base: true,
 	},
 	table: {
 		enableSorting: true,
@@ -183,6 +190,9 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 	},
 	json: {
 		enableCodeBlockEnhancer: true,
+		formatOnSave: false,
+	},
+	base: {
 		formatOnSave: false,
 	},
 };

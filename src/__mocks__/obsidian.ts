@@ -31,3 +31,16 @@ export class Notice {
 export class Setting {
 	constructor(_containerEl: HTMLElement) {}
 }
+
+/** YAML stubs — used by base/parser.ts unit tests */
+export function parseYaml(content: string): unknown {
+	try {
+		return JSON.parse(content);
+	} catch {
+		return null;
+	}
+}
+
+export function stringifyYaml(value: unknown): string {
+	return JSON.stringify(value, null, 2);
+}
