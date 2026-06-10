@@ -38,10 +38,10 @@ export class YamlModule implements PluginModule {
 	readonly description = t(yamlModuleI18n).description;
 
 	/** 防抖定时器：frontmatter 验证（300ms）。 */
-	private validationTimer: ReturnType<typeof setTimeout> | null = null;
+	private validationTimer: number | null = null;
 
 	/** 防抖定时器：Properties 面板增强（50ms）。 */
-	private enhanceTimer: ReturnType<typeof setTimeout> | null = null;
+	private enhanceTimer: number | null = null;
 
 	/** Properties 面板 DOM 增强器实例。 */
 	private readonly enhancer: PropertyEnhancer;
@@ -60,11 +60,11 @@ export class YamlModule implements PluginModule {
 		// registerEvent() 注册的事件由 Obsidian 自动清理。
 		// setTimeout 不由 Obsidian 管理，需要手动清理。
 		if (this.validationTimer !== null) {
-			clearTimeout(this.validationTimer);
+			window.clearTimeout(this.validationTimer);
 			this.validationTimer = null;
 		}
 		if (this.enhanceTimer !== null) {
-			clearTimeout(this.enhanceTimer);
+			window.clearTimeout(this.enhanceTimer);
 			this.enhanceTimer = null;
 		}
 	}
@@ -121,9 +121,9 @@ export class YamlModule implements PluginModule {
 				if (!(info instanceof MarkdownView)) return;
 
 				if (this.validationTimer !== null) {
-					clearTimeout(this.validationTimer);
+					window.clearTimeout(this.validationTimer);
 				}
-				this.validationTimer = setTimeout(() => {
+				this.validationTimer = window.setTimeout(() => {
 					this.validateCurrentFile(info);
 					this.validationTimer = null;
 				}, 300);
@@ -179,8 +179,8 @@ export class YamlModule implements PluginModule {
 	 */
 	private registerPropertyEnhancer(): void {
 		const schedule = () => {
-			if (this.enhanceTimer !== null) clearTimeout(this.enhanceTimer);
-			this.enhanceTimer = setTimeout(() => {
+			if (this.enhanceTimer !== null) window.clearTimeout(this.enhanceTimer);
+			this.enhanceTimer = window.setTimeout(() => {
 				this.enhanceTimer = null;
 				this.enhanceActiveLeaf();
 			}, 50);

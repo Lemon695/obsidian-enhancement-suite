@@ -18,7 +18,7 @@ export class TFile {
 }
 export class Plugin {}
 export class MarkdownView {
-	contentEl = globalThis.document?.createElement?.('div') ?? ({} as HTMLElement);
+	contentEl = window.document?.createElement?.('div') ?? ({} as HTMLElement);
 	getState(): { mode?: string } {
 		return { mode: 'preview' };
 	}

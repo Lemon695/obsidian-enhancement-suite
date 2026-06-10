@@ -175,7 +175,7 @@ export class ProgressModule implements PluginModule {
 		const addedHostClass = this.ensurePositionContext(scrollEl);
 
 		// 创建进度条元素
-		const barEl = document.createElement('div');
+		const barEl = activeDocument.createElement('div');
 		barEl.classList.add('es-progress-bar');
 		barEl.setAttribute('aria-hidden', 'true');
 		this.applyBarStyle(barEl);

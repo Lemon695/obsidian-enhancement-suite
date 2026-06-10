@@ -415,7 +415,7 @@ export class BaseFileView extends TextFileView {
 
 		// 收集所有文本节点（深度优先）
 		const textNodes: Text[] = [];
-		const walker = document.createTreeWalker(this.treeEl, NodeFilter.SHOW_TEXT);
+		const walker = activeDocument.createTreeWalker(this.treeEl, NodeFilter.SHOW_TEXT);
 		let node: Node | null;
 		while ((node = walker.nextNode())) {
 			textNodes.push(node as Text);
@@ -436,7 +436,7 @@ export class BaseFileView extends TextFileView {
 				}
 				hasMatch = true;
 				parts.push(text.substring(pos, idx));
-				const mark = document.createElement('mark');
+				const mark = activeDocument.createElement('mark');
 				mark.className = 'es-base-tree-highlight';
 				mark.textContent = text.substring(idx, idx + needle.length);
 				parts.push(mark);
@@ -448,10 +448,10 @@ export class BaseFileView extends TextFileView {
 			// 用 fragment 替换原文本节点
 			const parent = textNode.parentNode;
 			if (!parent) continue;
-			const frag = document.createDocumentFragment();
+			const frag = activeDocument.createDocumentFragment();
 			for (const part of parts) {
 				if (typeof part === 'string') {
-					frag.appendChild(document.createTextNode(part));
+					frag.appendChild(activeDocument.createTextNode(part));
 				} else {
 					frag.appendChild(part);
 					this.treeSearchMatches.push(part);
@@ -473,7 +473,7 @@ export class BaseFileView extends TextFileView {
 		for (const mark of marks) {
 			const parent = mark.parentNode;
 			if (!parent) continue;
-			parent.replaceChild(document.createTextNode(mark.textContent ?? ''), mark);
+			parent.replaceChild(activeDocument.createTextNode(mark.textContent ?? ''), mark);
 			parent.normalize();
 		}
 	}

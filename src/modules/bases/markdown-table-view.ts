@@ -161,7 +161,7 @@ export class MarkdownTableBasesView extends BasesView {
 		navigator.clipboard.writeText(md).then(() => {
 			const original = this.copyBtn.textContent ?? '';
 			this.copyBtn.textContent = this.i18n.copied;
-			setTimeout(() => {
+			window.setTimeout(() => {
 				this.copyBtn.textContent = original;
 			}, 1500);
 		}).catch(() => {

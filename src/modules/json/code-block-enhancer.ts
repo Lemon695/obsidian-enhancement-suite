@@ -40,7 +40,7 @@ export class CodeBlockEnhancer {
 
 		const i18n = t(jsonViewerUiI18n);
 
-		const btn = document.createElement('button');
+		const btn = activeDocument.createElement('button');
 		btn.textContent = i18n.openInViewer;
 		btn.className = 'es-json-code-block-btn';
 		btn.setAttribute('aria-label', i18n.openInViewer);

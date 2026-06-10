@@ -34,7 +34,7 @@ export class ReplaceModal extends Modal {
 	private multiFileResults: MultiFileMatch[] = [];
 
 	// 跨文件搜索防抖定时器
-	private multiSearchTimer: ReturnType<typeof setTimeout> | null = null;
+	private multiSearchTimer: number | null = null;
 
 	// DOM 引用，在 onOpen() 后有效
 	private statusEl!: HTMLElement;
@@ -65,7 +65,7 @@ export class ReplaceModal extends Modal {
 						this.searchTerm = value;
 						this.runSearch();
 					});
-				setTimeout(() => text.inputEl.focus(), 50);
+				window.setTimeout(() => text.inputEl.focus(), 50);
 			});
 
 		// --- 替换输入框 ---
@@ -140,7 +140,7 @@ export class ReplaceModal extends Modal {
 
 	onClose(): void {
 		if (this.multiSearchTimer !== null) {
-			clearTimeout(this.multiSearchTimer);
+			window.clearTimeout(this.multiSearchTimer);
 			this.multiSearchTimer = null;
 		}
 		this.contentEl.empty();
@@ -191,9 +191,9 @@ export class ReplaceModal extends Modal {
 		this.resultsEl.empty();
 
 		if (this.multiSearchTimer !== null) {
-			clearTimeout(this.multiSearchTimer);
+			window.clearTimeout(this.multiSearchTimer);
 		}
-		this.multiSearchTimer = setTimeout(() => {
+		this.multiSearchTimer = window.setTimeout(() => {
 			this.multiSearchTimer = null;
 			this.runMultiFileSearch().catch((e) => {
 				console.error('[enhancement-suite] Multi-file search error:', e);

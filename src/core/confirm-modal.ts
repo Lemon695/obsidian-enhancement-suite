@@ -48,7 +48,7 @@ class ConfirmModal extends Modal {
 			)
 			.addButton((btn) => {
 				btn.setButtonText(this.options.confirmText).onClick(() => this.finish(true));
-				if (this.options.warning) btn.setWarning();
+				if (this.options.warning) btn.buttonEl.addClass('mod-warning');
 				else btn.setCta();
 			});
 	}

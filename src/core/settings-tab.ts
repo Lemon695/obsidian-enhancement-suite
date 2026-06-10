@@ -19,6 +19,10 @@ export class EnhancementSettingsTab extends PluginSettingTab {
 	}
 
 	display(): void {
+		this.render();
+	}
+
+	private render(): void {
 		const { containerEl } = this;
 		containerEl.empty();
 
@@ -54,7 +58,7 @@ export class EnhancementSettingsTab extends PluginSettingTab {
 							await this.plugin.moduleManager.disableModule(module.id);
 						}
 						// Re-render so module settings appear / disappear immediately
-						this.display();
+						this.render();
 					});
 			});
 

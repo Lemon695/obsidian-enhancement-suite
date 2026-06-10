@@ -29,7 +29,7 @@ export class StatsModule implements PluginModule {
 	private statusBarItem: HTMLElement | null = null;
 
 	/** 防抖定时器（300ms）。 */
-	private updateTimer: ReturnType<typeof setTimeout> | null = null;
+	private updateTimer: number | null = null;
 
 	constructor(private readonly plugin: EnhancementSuitePlugin) {}
 
@@ -53,7 +53,7 @@ export class StatsModule implements PluginModule {
 
 	onunload(): void {
 		if (this.updateTimer !== null) {
-			clearTimeout(this.updateTimer);
+			window.clearTimeout(this.updateTimer);
 			this.updateTimer = null;
 		}
 		// 移除状态栏元素（Obsidian 不会自动移除 addStatusBarItem 创建的元素）
@@ -105,8 +105,8 @@ export class StatsModule implements PluginModule {
 
 	/** 防抖调度状态栏更新（300ms）。 */
 	private scheduleUpdate(): void {
-		if (this.updateTimer !== null) clearTimeout(this.updateTimer);
-		this.updateTimer = setTimeout(() => {
+		if (this.updateTimer !== null) window.clearTimeout(this.updateTimer);
+		this.updateTimer = window.setTimeout(() => {
 			this.updateTimer = null;
 			this.updateStatus();
 		}, 300);
