@@ -23,7 +23,7 @@ export class EnhancementSettingsTab extends PluginSettingTab {
 		containerEl.empty();
 
 		const i18n = t(settingsTabI18n);
-		containerEl.createEl('h2', { text: i18n.heading });
+		new Setting(containerEl).setName(i18n.heading).setHeading();
 		containerEl.createEl('p', {
 			text: i18n.intro,
 			cls: 'enhancement-settings-intro',

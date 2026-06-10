@@ -263,7 +263,7 @@ export class BaseFileView extends TextFileView {
 		// 替换行仅在源码模式下显示
 		const replaceRow = this.searchBarEl.querySelectorAll('.es-base-search-row')[1] as HTMLElement | undefined;
 		if (replaceRow) {
-			replaceRow.style.display = (withReplace && this.mode === 'source') ? '' : 'none';
+			replaceRow.toggleClass('es-hidden', !(withReplace && this.mode === 'source'));
 		}
 		this.searchInput.focus();
 		this.searchInput.select();
@@ -552,7 +552,7 @@ export class BaseFileView extends TextFileView {
 		// 替换行仅在源码模式下才有意义，切换到树形时隐藏替换行（但保留搜索栏）
 		const replaceRow = this.searchBarEl.querySelectorAll('.es-base-search-row')[1] as HTMLElement | undefined;
 		if (replaceRow && !isSource) {
-			replaceRow.style.display = 'none';
+			replaceRow.addClass('es-hidden');
 		}
 	}
 

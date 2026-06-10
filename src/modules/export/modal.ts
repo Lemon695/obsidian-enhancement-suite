@@ -138,10 +138,13 @@ export class ExportModal extends Modal {
 	 * 若命令不存在，则显示手动操作说明。
 	 */
 	private exportPdf(): void {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const commands = (this.app as any).commands as
-			| { executeCommandById: (id: string) => boolean }
-			| undefined;
+		// app.commands 是 Obsidian 未公开的内部 API；用类型化的 unknown 转换访问，
+		// 避免 any 带来的 no-unsafe-member-access。
+		const commands = (
+			this.app as unknown as {
+				commands?: { executeCommandById: (id: string) => boolean };
+			}
+		).commands;
 
 		const success = commands?.executeCommandById('workspace:export-pdf');
 

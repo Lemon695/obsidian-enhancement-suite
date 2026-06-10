@@ -17,6 +17,15 @@ export class TFile {
 	name = '';
 }
 export class Plugin {}
+export class MarkdownView {
+	contentEl = globalThis.document?.createElement?.('div') ?? ({} as HTMLElement);
+	getState(): { mode?: string } {
+		return { mode: 'preview' };
+	}
+}
+export class WorkspaceLeaf {
+	view: unknown = null;
+}
 export class Modal {
 	app: App;
 	constructor(app: App) {
@@ -30,6 +39,11 @@ export class Notice {
 }
 export class Setting {
 	constructor(_containerEl: HTMLElement) {}
+}
+
+/** Returns 'en' in test environment — i18n/locale.ts uses this to pick language. */
+export function getLanguage(): string {
+	return 'en';
 }
 
 /** YAML stubs — used by base/parser.ts unit tests */

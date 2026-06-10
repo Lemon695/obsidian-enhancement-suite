@@ -1,6 +1,8 @@
 import { App, Modal, Notice, Setting, TFile } from 'obsidian';
 import { t } from '../../i18n/locale';
 import { batchPropertyI18n } from '../../i18n/modules/yaml/batch-property';
+import { commonConfirmI18n } from '../../i18n/common';
+import { confirmModal } from '../../core/confirm-modal';
 
 type BatchOperation = 'set' | 'append' | 'delete';
 type BatchScope = 'folder' | 'vault';
@@ -163,7 +165,15 @@ export class BatchPropertyModal extends Modal {
 					? i18n.opAppend
 					: i18n.opDelete;
 
-		if (!window.confirm(i18n.confirmMsg(files.length, opLabel, this.key))) return;
+		const common = t(commonConfirmI18n);
+		const confirmed = await confirmModal(this.app, {
+			title: common.confirmTitle,
+			message: i18n.confirmMsg(files.length, opLabel, this.key),
+			confirmText: common.confirm,
+			cancelText: common.cancel,
+			warning: true,
+		});
+		if (!confirmed) return;
 
 		// 捕获局部变量，避免异步过程中 this 属性被更改
 		const key = this.key;

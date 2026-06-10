@@ -4,12 +4,13 @@ import {
 	SearchMatch,
 	MultiFileMatch,
 	searchInContent,
-	applyReplacement,
 	searchInFiles,
 	searchAndReplaceInFile,
 } from './searcher';
 import { t } from '../../i18n/locale';
 import { replaceModalI18n } from '../../i18n/modules/replace/modal';
+import { commonConfirmI18n } from '../../i18n/common';
+import { confirmModal } from '../../core/confirm-modal';
 
 type SearchScope = 'file' | 'folder' | 'vault';
 
@@ -444,7 +445,15 @@ export class ReplaceModal extends Modal {
 
 		const fileCount = this.multiFileResults.length;
 		const warning = i18n.replaceAllFilesWarning(fileCount);
-		if (!window.confirm(warning)) return;
+		const common = t(commonConfirmI18n);
+		const confirmed = await confirmModal(this.app, {
+			title: common.confirmTitle,
+			message: warning,
+			confirmText: common.confirm,
+			cancelText: common.cancel,
+			warning: true,
+		});
+		if (!confirmed) return;
 
 		let totalReplaced = 0;
 		let replacedFiles = 0;

@@ -166,3 +166,36 @@ export function validateFrontmatterYaml(
 export function hasFrontmatter(content: string): boolean {
 	return content.startsWith('---\n') || content.startsWith('---\r\n');
 }
+
+/**
+ * 移除文档开头的 YAML frontmatter 块，返回其余内容。
+ *
+ * 行为：
+ *   - 存在有效 frontmatter → 去掉从第 0 行到结束分隔线（含）的所有行，返回其余部分
+ *   - 不存在 frontmatter → 原样返回
+ *   - 不做任何语法转换（wiki 链接、callout、嵌入引用等保持原样）
+ *
+ * Pure function: yes（无副作用，不修改输入）
+ */
+export function stripFrontmatter(content: string): string {
+	const fm = extractFrontmatter(content);
+	if (!fm) return content;
+	const lines = content.split('\n');
+	return lines.slice(fm.endLine + 1).join('\n');
+}
+
+/**
+ * 提取文档开头的完整 YAML frontmatter 块（含两端的 `---` 分隔线）。
+ *
+ * 行为：
+ *   - 存在有效 frontmatter → 返回包含分隔线的完整块字符串
+ *   - 不存在 frontmatter → 返回 null
+ *
+ * Pure function: yes（无副作用，不修改输入）
+ */
+export function extractFrontmatterBlock(content: string): string | null {
+	const fm = extractFrontmatter(content);
+	if (!fm) return null;
+	const lines = content.split('\n');
+	return lines.slice(fm.startLine, fm.endLine + 1).join('\n');
+}

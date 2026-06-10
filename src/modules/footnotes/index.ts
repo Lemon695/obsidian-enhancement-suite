@@ -4,6 +4,11 @@ import type EnhancementSuitePlugin from '../../main';
 import { t } from '../../i18n/locale';
 import { footnotesModuleI18n } from '../../i18n/modules/footnotes/module';
 import { footnotesCommandsI18n } from '../../i18n/modules/footnotes/commands';
+import {
+	pickNextFootnoteNumber,
+	renumberFootnotes as renumberFootnotesContent,
+	removeOrphanFootnoteDefs,
+} from './footnotes-ops';
 
 /**
  * Footnotes Enhancement Module — 脚注工具模块
@@ -80,19 +85,7 @@ export class FootnotesModule implements PluginModule {
 	 */
 	private insertFootnote(editor: Editor): void {
 		const i18n = t(footnotesCommandsI18n);
-		const content = editor.getValue();
-
-		// 收集已有的数字编号
-		const usedNums = new Set<number>();
-		const numPattern = /\[\^(\d+)\]/g;
-		let m: RegExpExecArray | null;
-		while ((m = numPattern.exec(content)) !== null) {
-			usedNums.add(parseInt(m[1] ?? '0', 10));
-		}
-
-		// 找最小未使用编号
-		let nextN = 1;
-		while (usedNums.has(nextN)) nextN++;
+		const nextN = pickNextFootnoteNumber(editor.getValue());
 
 		// 在光标位置插入引用
 		const cursor = editor.getCursor();
@@ -100,7 +93,6 @@ export class FootnotesModule implements PluginModule {
 		editor.replaceRange(ref, cursor);
 
 		// 在文末追加定义（确保前有换行）
-		const newContent = editor.getValue();
 		const lastLine = editor.lineCount() - 1;
 		const lastLineText = editor.getLine(lastLine);
 		const needsNewline = lastLineText.length > 0;
@@ -124,56 +116,9 @@ export class FootnotesModule implements PluginModule {
 	 */
 	private renumberFootnotes(editor: Editor): void {
 		const i18n = t(footnotesCommandsI18n);
-		let content = editor.getValue();
-
-		// 收集引用标签（按首次出现顺序，排除定义行）
-		const labelOrder: string[] = [];
-		const seenLabels = new Set<string>();
-		const scanPattern = /\[\^([^\]]+)\](:?)/g;
-		let m: RegExpExecArray | null;
-
-		while ((m = scanPattern.exec(content)) !== null) {
-			const label = m[1] ?? '';
-			const isDefinition = m[2] === ':';
-			if (!isDefinition && !seenLabels.has(label)) {
-				seenLabels.add(label);
-				labelOrder.push(label);
-			}
-		}
-
-		if (labelOrder.length === 0) {
-			new Notice(i18n.renumberedNotice(0));
-			return;
-		}
-
-		// 建立重命名映射
-		const renameMap = new Map<string, string>(
-			labelOrder.map((label, idx) => [label, String(idx + 1)])
-		);
-
-		// 阶段 1：替换为唯一占位符（按标签长度降序，防止短标签误匹配长标签前缀）
-		const sortedLabels = [...renameMap.keys()].sort((a, b) => b.length - a.length);
-		const placeholders = new Map<string, string>();
-
-		sortedLabels.forEach((label, i) => {
-			placeholders.set(label, `__FNPH${i}__`);
-		});
-
-		for (const label of sortedLabels) {
-			const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-			const ph = placeholders.get(label) ?? '';
-			content = content.replace(new RegExp(`\\[\\^${escaped}\\]`, 'g'), `[^${ph}]`);
-		}
-
-		// 阶段 2：将占位符替换为最终编号
-		for (const [label, ph] of placeholders.entries()) {
-			const newNum = renameMap.get(label) ?? label;
-			const escapedPh = ph.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-			content = content.replace(new RegExp(`\\[\\^${escapedPh}\\]`, 'g'), `[^${newNum}]`);
-		}
-
-		editor.setValue(content);
-		new Notice(i18n.renumberedNotice(labelOrder.length));
+		const { content, count } = renumberFootnotesContent(editor.getValue());
+		if (count > 0) this.applyContent(editor, content);
+		new Notice(i18n.renumberedNotice(count));
 	}
 
 	/**
@@ -185,42 +130,30 @@ export class FootnotesModule implements PluginModule {
 	 */
 	private cleanOrphanFootnotes(editor: Editor): void {
 		const i18n = t(footnotesCommandsI18n);
-		const content = editor.getValue();
+		const { content, removed } = removeOrphanFootnoteDefs(editor.getValue());
+		if (removed > 0) this.applyContent(editor, content);
+		new Notice(i18n.cleanedNotice(removed));
+	}
 
-		// 收集所有被引用的标签（排除定义行自身）
-		const usedLabels = new Set<string>();
-		const scanPattern = /\[\^([^\]]+)\](:?)/g;
-		let m: RegExpExecArray | null;
+	/**
+	 * 用新内容整体替换编辑器，并尽量保留光标位置与滚动状态。
+	 *
+	 * 为什么不直接 `editor.setValue()`：setValue 会把光标重置到文档开头、
+	 * 丢失滚动位置（重编号/清理脚注是「整篇变换」，但用户视觉焦点应保持）。
+	 * 这里先快照光标与滚动，setValue 后再把光标钳制到合法范围并恢复滚动。
+	 */
+	private applyContent(editor: Editor, newContent: string): void {
+		if (editor.getValue() === newContent) return;
 
-		while ((m = scanPattern.exec(content)) !== null) {
-			const label = m[1] ?? '';
-			const isDefinition = m[2] === ':';
-			if (!isDefinition) {
-				usedLabels.add(label);
-			}
-		}
+		const cursor = editor.getCursor();
+		const scroll = editor.getScrollInfo();
 
-		// 过滤掉孤立定义行
-		const lines = content.split('\n');
-		const cleanedLines: string[] = [];
-		let removedCount = 0;
+		editor.setValue(newContent);
 
-		for (const line of lines) {
-			const defMatch = /^\[\^([^\]]+)\]:/.exec(line);
-			if (defMatch) {
-				const label = defMatch[1] ?? '';
-				if (!usedLabels.has(label)) {
-					removedCount++;
-					continue; // 跳过孤立定义行
-				}
-			}
-			cleanedLines.push(line);
-		}
-
-		if (removedCount > 0) {
-			editor.setValue(cleanedLines.join('\n'));
-		}
-
-		new Notice(i18n.cleanedNotice(removedCount));
+		const lastLine = Math.max(0, editor.lineCount() - 1);
+		const line = Math.min(cursor.line, lastLine);
+		const ch = Math.min(cursor.ch, editor.getLine(line).length);
+		editor.setCursor({ line, ch });
+		editor.scrollTo(scroll.left, scroll.top);
 	}
 }

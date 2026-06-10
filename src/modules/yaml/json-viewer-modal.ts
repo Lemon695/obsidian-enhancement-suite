@@ -115,7 +115,15 @@ function renderNode(
 				: typeof value === 'boolean'
 					? 'es-json-boolean'
 					: 'es-json-unknown';
-		renderPrimitive(container, String(value), cls, key, isLast);
+		// 显式收窄：String() 仅用于不会产生 "[object Object]" 的基本类型，
+		// 其余（理论上不会到达此分支的对象等）走 JSON.stringify 兜底。
+		const text =
+			typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint'
+				? String(value)
+				: value === undefined
+					? 'undefined'
+					: JSON.stringify(value) ?? 'null';
+		renderPrimitive(container, text, cls, key, isLast);
 	}
 }
 
@@ -157,7 +165,7 @@ function renderCollapsible(
 		cls: 'es-json-collapsed-hint',
 		text: isLast ? ` ... ${closeBrace}` : ` ... ${closeBrace},`,
 	});
-	hint.style.display = 'none';
+	hint.addClass('es-hidden');
 
 	// Body（缩进子项）
 	const body = wrapper.createDiv({ cls: 'es-json-body' });
@@ -177,7 +185,7 @@ function renderCollapsible(
 		toggle.setAttribute('aria-label', expanded ? i18n.collapse : i18n.expand);
 		body.style.display = expanded ? '' : 'none';
 		footerRow.style.display = expanded ? '' : 'none';
-		hint.style.display = expanded ? 'none' : '';
+		hint.toggleClass('es-hidden', expanded);
 	};
 
 	toggle.addEventListener('click', (e) => {

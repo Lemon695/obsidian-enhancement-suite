@@ -331,20 +331,35 @@
 
 /*
  * 阅读进度条 — 作为 .markdown-preview-view 的第一个子元素注入。
- * position:sticky; top:0 使其在滚动时始终固定在可视区域顶部。
- * width 通过 JS 动态更新（0% → 100%）。
+ * 通过 absolute + JS transform 使其在滚动时始终固定在可视区域顶部。
+ * width 与 transform 通过 JS 动态更新。
  * height 与 background-color 通过 style 属性由 ProgressModule 控制。
  */
 .es-progress-bar {
-	position: sticky;
+	position: absolute;
 	top: 0;
 	left: 0;
 	width: 0%;
 	z-index: 100;
 	pointer-events: none;
 	transition: width 80ms linear;
-	/* 用负 margin-bottom 抵消自身高度，避免影响内容布局 */
-	margin-bottom: -3px;
+}
+
+/*
+ * 进度条宿主定位类：仅当滚动容器原本为 static 时由 ProgressModule 添加，
+ * 为内部 absolute 进度条提供定位上下文。容器已有定位则不添加。
+ */
+.es-progress-host {
+	position: relative;
+}
+
+/* ============================================================
+   Shared utilities
+   ============================================================ */
+
+/* 通用隐藏类（替代直接赋值 element.style.display = 'none'，满足审核规则） */
+.es-hidden {
+	display: none;
 }
 
 /* ============================================================
@@ -726,4 +741,483 @@ mark.es-base-tree-highlight--current {
 	color: var(--text-on-accent, #fff);
 	border-radius: 2px;
 	padding: 0;
+}
+
+/* ============================================================
+   Rename Module (.es-rename-*)
+   ============================================================ */
+
+/* Quick rename modal */
+.es-rename-modal .es-rename-preview {
+	font-family: var(--font-monospace);
+	font-size: var(--font-ui-smaller);
+	color: var(--text-accent);
+	word-break: break-all;
+}
+
+/* Batch rename view */
+.es-batch-rename-view {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+	padding: var(--size-4-4);
+	padding-bottom: 0;
+	box-sizing: border-box;
+	gap: var(--size-4-3);
+}
+
+.es-rename-filter-bar {
+	flex-shrink: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--size-4-2);
+	align-items: center;
+	padding: var(--size-4-2) var(--size-4-3);
+	background: var(--background-secondary);
+	border-radius: var(--radius-m);
+}
+
+.es-rename-search {
+	flex: 1;
+	min-width: 160px;
+}
+
+.es-rename-type-select,
+.es-rename-date-input {
+	height: var(--input-height);
+	border-radius: var(--radius-s);
+	border: 1px solid var(--background-modifier-border);
+	background: var(--background-primary);
+	color: var(--text-normal);
+	padding: 0 var(--size-4-2);
+}
+
+.es-rename-date-label {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-1);
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
+}
+
+.es-rename-clear-btn {
+	font-size: var(--font-ui-smaller);
+	padding: 2px 10px;
+	border-radius: var(--radius-s);
+	background: transparent;
+	border: 1px solid var(--background-modifier-border);
+	color: var(--text-muted);
+	cursor: pointer;
+}
+
+.es-rename-clear-btn:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+/* Bulk action bar */
+.es-rename-bulk-bar {
+	flex-shrink: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--size-4-2);
+	align-items: center;
+}
+
+/* Pattern picker table (QuickRenameModal / BatchRenameConfirmModal / expand row) */
+.es-rename-picker-table-wrapper {
+	max-height: 420px;
+	overflow-y: auto;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-m);
+	margin-bottom: var(--size-4-3);
+}
+
+.es-rename-picker-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: var(--font-ui-small);
+}
+
+.es-rename-picker-table thead th {
+	position: sticky;
+	top: 0;
+	background: var(--background-secondary);
+	padding: var(--size-4-1) var(--size-4-2);
+	border-bottom: 2px solid var(--background-modifier-border);
+	color: var(--text-muted);
+	font-weight: var(--font-semibold);
+	text-align: left;
+}
+
+.es-rename-picker-th-preview {
+	min-width: 300px;
+}
+
+.es-rename-picker-th-indicator {
+	width: 20px;
+}
+
+.es-rename-picker-row {
+	cursor: pointer;
+	border-bottom: 1px solid var(--background-modifier-border-focus);
+	transition: background 80ms ease;
+}
+
+.es-rename-picker-row:hover {
+	background: var(--background-modifier-hover);
+}
+
+.es-rename-picker-row.is-selected {
+	background: var(--background-modifier-hover);
+	border-left: 3px solid var(--color-accent);
+}
+
+.es-rename-picker-row td {
+	padding: var(--size-4-1) var(--size-4-2);
+	vertical-align: middle;
+}
+
+.es-rename-picker-indicator {
+	color: transparent;
+	font-size: 10px;
+	width: 20px;
+	text-align: center;
+}
+
+.es-rename-picker-row.is-selected .es-rename-picker-indicator {
+	color: var(--color-accent);
+}
+
+.es-rename-picker-name {
+	white-space: nowrap;
+}
+
+.es-rename-picker-type-td {
+	white-space: nowrap;
+}
+
+.es-rename-type-badge {
+	border-radius: 10px;
+	font-size: var(--font-ui-smaller);
+	padding: 1px 7px;
+	font-weight: var(--font-medium);
+}
+
+.es-rename-type-prefix {
+	background: rgba(59, 130, 246, 0.15);
+	color: var(--color-blue);
+}
+
+.es-rename-type-suffix {
+	background: rgba(34, 197, 94, 0.15);
+	color: var(--color-green);
+}
+
+.es-rename-type-replace {
+	background: rgba(249, 115, 22, 0.15);
+	color: var(--color-orange);
+}
+
+.es-rename-picker-preview-td {
+	font-family: var(--font-monospace);
+	font-size: var(--font-ui-smaller);
+	color: var(--text-accent);
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 2px;
+}
+
+.es-rename-picker-custom-static {
+	font-family: var(--font-monospace);
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
+}
+
+.es-rename-picker-custom-input {
+	width: 90px;
+	height: 20px;
+	font-size: var(--font-ui-smaller);
+	padding: 0 4px;
+	border-radius: var(--radius-s);
+	border: 1px solid var(--background-modifier-border);
+	background: var(--background-primary);
+	color: var(--text-normal);
+}
+
+/* Modal sizing — applied to .modal (the outer wrapper), not .modal-content */
+.modal.es-rename-modal-large {
+	width: min(900px, 94vw);
+	max-height: min(720px, 92vh);
+	overflow: hidden; /* clip children; flex children control their own scroll */
+}
+
+/* Quick rename modal:
+   Turn contentEl into a flex column so the table scrolls internally
+   and the button bar is always pinned at the bottom.
+   .modal-content.es-rename-modal targets the same element (contentEl). */
+.modal-content.es-rename-modal {
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	padding-bottom: 0; /* bottom padding moved to btn-bar */
+}
+
+.es-rename-modal .es-rename-modal-file-bar,
+.es-rename-modal .es-rename-name-bar {
+	flex-shrink: 0;
+}
+
+/* Table fills all remaining height and scrolls internally */
+.es-rename-modal .es-rename-picker-table-wrapper {
+	flex: 1;
+	min-height: 80px;
+	max-height: none;
+	overflow-y: auto;
+}
+
+/* Button bar is always visible at the bottom */
+.es-rename-modal .es-rename-modal-btn-bar {
+	flex-shrink: 0;
+	padding-bottom: var(--size-4-8);
+}
+
+/* Quick rename modal — per-element spacing */
+.es-rename-modal .es-rename-modal-file-bar {
+	margin-bottom: var(--size-4-3);
+	padding: var(--size-4-2) var(--size-4-3);
+	background: var(--background-secondary);
+	border-radius: var(--radius-m);
+}
+
+.es-rename-modal-file-label {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+}
+
+.es-rename-modal-file-name {
+	font-family: var(--font-monospace);
+	font-size: var(--font-ui-smaller);
+	font-weight: var(--font-semibold);
+	color: var(--text-normal);
+}
+
+/* Editable new-name bar */
+.es-rename-name-bar {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-2);
+	margin-bottom: var(--size-4-3);
+	padding: var(--size-4-2) var(--size-4-3);
+	background: var(--background-secondary);
+	border-radius: var(--radius-s);
+}
+
+.es-rename-name-label {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+	white-space: nowrap;
+}
+
+.es-rename-name-input {
+	flex: 1;
+	font-family: var(--font-monospace);
+	font-size: var(--font-ui-smaller);
+	background: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	padding: var(--size-4-1) var(--size-4-2);
+	color: var(--text-normal);
+	outline: none;
+}
+
+.es-rename-name-input:focus {
+	border-color: var(--interactive-accent);
+	box-shadow: 0 0 0 2px var(--background-modifier-active-hover);
+}
+
+.es-rename-name-input.is-invalid {
+	border-color: var(--text-error);
+}
+
+.es-rename-name-error {
+	font-size: var(--font-ui-smaller);
+	color: var(--text-error);
+	white-space: nowrap;
+}
+
+.es-rename-modal-btn-bar {
+	display: flex;
+	justify-content: flex-end;
+	gap: var(--size-4-2);
+	margin-top: var(--size-4-3);
+}
+
+/* Batch confirm modal */
+.es-rename-confirm-modal .es-rename-confirm-preview-section {
+	margin: var(--size-4-3) 0;
+}
+
+.es-rename-confirm-preview-label {
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
+	margin-bottom: var(--size-4-1);
+}
+
+.es-rename-confirm-preview-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.es-rename-confirm-preview-item {
+	font-family: var(--font-monospace);
+	font-size: var(--font-ui-smaller);
+	padding: 2px 0;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	flex-wrap: wrap;
+}
+
+.es-rename-confirm-old {
+	color: var(--text-muted);
+}
+
+.es-rename-confirm-arrow {
+	color: var(--text-faint);
+}
+
+.es-rename-confirm-new {
+	color: var(--color-green);
+	font-weight: var(--font-medium);
+}
+
+.es-rename-confirm-preview-more {
+	color: var(--text-faint);
+	font-size: var(--font-ui-smaller);
+	padding: 2px 0;
+}
+
+/* Expand row pattern picker — compact, no border */
+.es-rename-expand-row .es-rename-picker-table-wrapper {
+	max-height: 240px;
+	margin-bottom: var(--size-4-2);
+}
+
+.es-rename-expand-btn-row {
+	display: flex;
+	gap: var(--size-4-2);
+	align-items: center;
+	margin-top: var(--size-4-2);
+}
+
+/* Table — takes all remaining vertical space and scrolls */
+.es-rename-table-wrapper {
+	flex: 1;
+	min-height: 0;        /* critical: lets flex child shrink below content height */
+	overflow-y: auto;
+	overflow-x: auto;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-m);
+}
+
+.es-rename-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: var(--font-ui-small);
+}
+
+.es-rename-table th {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	background: var(--background-secondary);
+	text-align: left;
+	padding: var(--size-4-1) var(--size-4-2);
+	border-bottom: 2px solid var(--background-modifier-border);
+	color: var(--text-muted);
+	font-weight: var(--font-semibold);
+}
+
+.es-rename-table td {
+	padding: var(--size-4-1) var(--size-4-2);
+	border-bottom: 1px solid var(--background-modifier-border-focus);
+	vertical-align: middle;
+}
+
+.es-rename-row:hover {
+	background: var(--background-modifier-hover);
+}
+
+.es-rename-name-td {
+	font-family: var(--font-monospace);
+	font-size: var(--font-ui-smaller);
+	word-break: break-all;
+}
+
+.es-rename-type-td,
+.es-rename-date-td {
+	white-space: nowrap;
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+}
+
+.es-rename-empty-cell {
+	text-align: center;
+	padding: var(--size-4-6) !important;
+	color: var(--text-faint);
+}
+
+/* Inline expand row */
+.es-rename-expand-row td {
+	background: var(--background-secondary);
+	padding: var(--size-4-2) var(--size-4-4);
+}
+
+.es-rename-expand-inner {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	padding: var(--size-4-2) 0;
+}
+
+.es-rename-row-pattern,
+.es-rename-row-custom {
+	height: var(--input-height);
+	border-radius: var(--radius-s);
+	border: 1px solid var(--background-modifier-border);
+	background: var(--background-primary);
+	color: var(--text-normal);
+	padding: 0 var(--size-4-2);
+}
+
+.es-rename-row-preview {
+	font-family: var(--font-monospace);
+	font-size: var(--font-ui-smaller);
+	color: var(--text-accent);
+	flex: 1;
+}
+
+/* Pagination */
+.es-rename-pagination {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--size-4-3);
+	padding: var(--size-4-2) 0 var(--size-4-3);
+}
+
+.es-rename-page-info {
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
+}
+
+.es-rename-page-btn {
+	padding: 2px 10px;
+	border-radius: var(--radius-s);
+	font-size: var(--font-ui-smaller);
 }

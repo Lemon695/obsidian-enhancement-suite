@@ -2,6 +2,7 @@ import { Setting } from 'obsidian';
 import type { PluginModule } from '../../core/types';
 import type EnhancementSuitePlugin from '../../main';
 import { ExportModal } from './modal';
+import { BatchExportModal } from './batch-modal';
 import { t } from '../../i18n/locale';
 import { exportModuleI18n } from '../../i18n/modules/export/module';
 import { exportSettingsI18n } from '../../i18n/modules/export/settings';
@@ -39,6 +40,14 @@ export class ExportModule implements PluginModule {
 					new ExportModal(this.plugin.app, this.plugin, file).open();
 				}
 				return true;
+			},
+		});
+
+		this.plugin.addCommand({
+			id: 'export-batch',
+			name: i18n.batchExport.name,
+			callback: () => {
+				new BatchExportModal(this.plugin.app, this.plugin).open();
 			},
 		});
 	}

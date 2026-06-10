@@ -121,6 +121,27 @@ export interface BaseModuleSettings {
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface VaultModuleSettings {}
 
+/** Bases 模块暂无独立设置项。 */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface BasesModuleSettings {}
+
+/** Rename 模块暂无独立设置项。 */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface RenameModuleSettings {}
+
+/** Clipboard 模块暂无独立设置项。 */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface ClipboardModuleSettings {}
+
+/** Paste Link 模块暂无独立设置项。 */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface PasteLinkModuleSettings {}
+
+export interface TerminalModuleSettings {
+	/** 'auto' 表示使用检测到的第一个终端；其余值为 TerminalId，如 'Warp' | 'iTerm' | 'Terminal'。 */
+	preferredTerminal: string;
+}
+
 // ---------------------------------------------------------------------------
 // Global plugin settings
 // ---------------------------------------------------------------------------
@@ -151,6 +172,11 @@ export interface PluginSettings {
 	json: JsonModuleSettings;
 	base: BaseModuleSettings;
 	vault: VaultModuleSettings;
+	bases: BasesModuleSettings;
+	rename: RenameModuleSettings;
+	clipboard: ClipboardModuleSettings;
+	terminal: TerminalModuleSettings;
+	pasteLink: PasteLinkModuleSettings;
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -166,6 +192,11 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		json: true,
 		base: true,
 		vault: true,
+		bases: true,
+		rename: true,
+		clipboard: true,
+		terminal: true,
+		pasteLink: true,
 	},
 	table: {
 		enableSorting: true,
@@ -202,4 +233,11 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		formatOnSave: false,
 	},
 	vault: {},
+	bases: {},
+	rename: {},
+	clipboard: {},
+	terminal: {
+		preferredTerminal: 'auto',
+	},
+	pasteLink: {},
 };

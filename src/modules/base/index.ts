@@ -38,8 +38,9 @@ export class BaseModule implements PluginModule {
 	}
 
 	onunload(): void {
-		// 卸载时关闭所有 Base 文件视图叶子，避免孤立 leaf
-		this.plugin.app.workspace.detachLeavesOfType(BASE_FILE_VIEW_TYPE);
+		// 不在 onunload 中 detachLeavesOfType：
+		// Obsidian 会自行处理已注册视图的叶子，手动 detach 反而会在下次加载时
+		// 把用户手动摆放的面板重置回默认位置（见 obsidianmd/detach-leaves 规则）。
 	}
 
 	renderSettings(containerEl: HTMLElement): void {
@@ -85,7 +86,7 @@ export class BaseModule implements PluginModule {
 								type: BASE_FILE_VIEW_TYPE,
 								state: { file: file.path },
 							});
-							this.plugin.app.workspace.revealLeaf(leaf);
+							void this.plugin.app.workspace.revealLeaf(leaf);
 						}),
 				);
 			}),
@@ -111,7 +112,7 @@ export class BaseModule implements PluginModule {
 					type: BASE_FILE_VIEW_TYPE,
 					state: { file: file.path },
 				}).then(() => {
-					this.plugin.app.workspace.revealLeaf(leaf);
+					void this.plugin.app.workspace.revealLeaf(leaf);
 				}).catch((e) => {
 					console.error('[enhancement-suite] Base open error:', e);
 				});

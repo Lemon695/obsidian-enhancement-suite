@@ -4,6 +4,8 @@ import {
 	validateFrontmatterYaml,
 	parseFrontmatterFields,
 	hasFrontmatter,
+	stripFrontmatter,
+	extractFrontmatterBlock,
 } from './frontmatter';
 
 // ---------------------------------------------------------------------------
@@ -136,5 +138,56 @@ describe('validateFrontmatterYaml — 非法内容', () => {
 		const errors = validateFrontmatterYaml(yaml);
 		expect(errors.length).toBeGreaterThan(0);
 		expect(errors[0]?.message).toMatch(/invalid/i);
+	});
+});
+
+// ---------------------------------------------------------------------------
+// stripFrontmatter
+// ---------------------------------------------------------------------------
+
+describe('stripFrontmatter', () => {
+	it('有 frontmatter 时去掉 frontmatter 块，返回剩余内容', () => {
+		const content = '---\ntitle: My Note\n---\n# Hello\n\nBody.';
+		expect(stripFrontmatter(content)).toBe('# Hello\n\nBody.');
+	});
+
+	it('没有 frontmatter 时原样返回', () => {
+		const content = '# Hello\n\nBody.';
+		expect(stripFrontmatter(content)).toBe(content);
+	});
+
+	it('frontmatter 之后有空行时保留空行', () => {
+		const content = '---\ntitle: Test\n---\n\n# Title\n';
+		expect(stripFrontmatter(content)).toBe('\n# Title\n');
+	});
+
+	it('仅有 frontmatter、无正文时返回空字符串', () => {
+		const content = '---\ntitle: Only FM\n---';
+		expect(stripFrontmatter(content)).toBe('');
+	});
+
+	it('不对 wiki 链接等 Obsidian 语法做任何转换', () => {
+		const content = '---\ntags: [a]\n---\n[[Link]] ![[embed]] ==highlight==';
+		expect(stripFrontmatter(content)).toBe('[[Link]] ![[embed]] ==highlight==');
+	});
+});
+
+// ---------------------------------------------------------------------------
+// extractFrontmatterBlock
+// ---------------------------------------------------------------------------
+
+describe('extractFrontmatterBlock', () => {
+	it('有 frontmatter 时返回含分隔线的完整块', () => {
+		const content = '---\ntitle: Test\ntags: [a, b]\n---\n# Body';
+		expect(extractFrontmatterBlock(content)).toBe('---\ntitle: Test\ntags: [a, b]\n---');
+	});
+
+	it('没有 frontmatter 时返回 null', () => {
+		expect(extractFrontmatterBlock('# Hello\nWorld')).toBeNull();
+	});
+
+	it('frontmatter 内容为空时仍返回分隔线对', () => {
+		const content = '---\n---\n# Body';
+		expect(extractFrontmatterBlock(content)).toBe('---\n---');
 	});
 });

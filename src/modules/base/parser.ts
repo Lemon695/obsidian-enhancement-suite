@@ -23,7 +23,7 @@ export function parseBase(content: string): ParseResult {
 		return { ok: false, error: 'Empty content' };
 	}
 	try {
-		const value = parseYaml(content);
+		const value = parseYaml(content) as unknown;
 		return { ok: true, value };
 	} catch (e) {
 		return { ok: false, error: e instanceof Error ? e.message : String(e) };

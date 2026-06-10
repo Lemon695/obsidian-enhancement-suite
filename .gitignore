@@ -21,3 +21,11 @@ data.json
 
 # Exclude macOS Finder (System Explorer) View States
 .DS_Store
+
+# Claude Code — 个人本地配置，不提交（团队共享配置在 .claude/settings.json）
+.claude/settings.local.json
+CLAUDE.local.md
+/manifest.json.bak
+.omx/
+/pnpm-lock.yaml
+/build-v1.sh

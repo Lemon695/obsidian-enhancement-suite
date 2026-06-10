@@ -2,6 +2,7 @@ import { Plugin } from 'obsidian';
 import { ModuleManager } from './core/module-manager';
 import { EnhancementSettingsTab } from './core/settings-tab';
 import { DEFAULT_SETTINGS, PluginSettings } from './core/types';
+import { mergeSettings } from './core/settings-merge';
 import { TableModule } from './modules/table';
 import { YamlModule } from './modules/yaml';
 import { ExportModule } from './modules/export';
@@ -13,6 +14,11 @@ import { ProgressModule } from './modules/progress';
 import { JsonModule } from './modules/json';
 import { BaseModule } from './modules/base';
 import { VaultModule } from './modules/vault';
+import { BasesModule } from './modules/bases';
+import { RenameModule } from './modules/rename';
+import { ClipboardModule } from './modules/clipboard';
+import { TerminalModule } from './modules/terminal';
+import { PasteLinkModule } from './modules/paste-link';
 
 /**
  * EnhancementSuitePlugin — the Obsidian plugin entry point.
@@ -51,6 +57,11 @@ export default class EnhancementSuitePlugin extends Plugin {
 		this.moduleManager.register(new JsonModule(this));
 		this.moduleManager.register(new BaseModule(this));
 		this.moduleManager.register(new VaultModule(this));
+		this.moduleManager.register(new BasesModule(this));
+		this.moduleManager.register(new RenameModule(this));
+		this.moduleManager.register(new ClipboardModule(this));
+		this.moduleManager.register(new TerminalModule(this));
+		this.moduleManager.register(new PasteLinkModule(this));
 		// --------------------------------------------------------------------
 
 		await this.moduleManager.loadAll();
@@ -63,8 +74,9 @@ export default class EnhancementSuitePlugin extends Plugin {
 	}
 
 	async loadSettings(): Promise<void> {
-		this.settings = Object.assign(
-			{},
+		// 深合并：逐模块切片合并，避免旧 data.json 覆盖新版新增的默认字段。
+		// 详见 core/settings-merge.ts。
+		this.settings = mergeSettings(
 			DEFAULT_SETTINGS,
 			await this.loadData() as Partial<PluginSettings>
 		);
