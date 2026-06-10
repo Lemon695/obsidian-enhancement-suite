@@ -159,7 +159,7 @@ export class TerminalLauncher {
 		}
 
 		const command = buildCommand(dirPath, terminalId);
-		// eslint-disable-next-line @typescript-eslint/no-require-imports
+		// eslint-disable-next-line @typescript-eslint/no-require-imports -- Node.js built-ins must be loaded via require() at runtime in Obsidian's Electron environment
 		const { exec } = require('child_process') as typeof import('child_process');
 		exec(command, (err) => {
 			if (err) {
@@ -187,7 +187,7 @@ export class TerminalLauncher {
 	}
 
 	private scanMac(): DetectedTerminal[] {
-		// eslint-disable-next-line @typescript-eslint/no-require-imports
+		// eslint-disable-next-line @typescript-eslint/no-require-imports -- Node.js built-ins must be loaded via require() at runtime in Obsidian's Electron environment
 		const fs = require('fs') as typeof import('fs');
 		return MAC_TERMINALS
 			.filter((c) => fs.existsSync(c.bundlePath))
@@ -195,7 +195,7 @@ export class TerminalLauncher {
 	}
 
 	private scanLinux(): DetectedTerminal[] {
-		// eslint-disable-next-line @typescript-eslint/no-require-imports
+		// eslint-disable-next-line @typescript-eslint/no-require-imports -- Node.js built-ins must be loaded via require() at runtime in Obsidian's Electron environment
 		const { execSync } = require('child_process') as typeof import('child_process');
 		return LINUX_TERMINALS.filter(({ id }) => {
 			try {

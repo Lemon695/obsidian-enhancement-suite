@@ -35,7 +35,7 @@ export class VaultOpener {
 		if (registered === null) return; // 配置读写失败，错误已通过 Notice 提示
 
 		// 3. 显示通知并打开仓库
-		// eslint-disable-next-line @typescript-eslint/no-require-imports
+		// eslint-disable-next-line @typescript-eslint/no-require-imports -- Node.js/Electron modules must be loaded via require() at runtime; static import is not available in Obsidian's plugin environment
 		const path = require('path') as typeof import('path');
 		const vaultName = path.basename(selectedPath);
 		new Notice(registered ? i18n.openingNotice(vaultName) : i18n.alreadyRegisteredNotice(vaultName));
@@ -53,7 +53,7 @@ export class VaultOpener {
 
 		try {
 			// Obsidian 1.x：@electron/remote
-			// eslint-disable-next-line @typescript-eslint/no-require-imports
+			// eslint-disable-next-line @typescript-eslint/no-require-imports -- Node.js/Electron modules must be loaded via require() at runtime; static import is not available in Obsidian's plugin environment
 			const remote = require('@electron/remote') as {
 				dialog: {
 					showOpenDialog(
@@ -69,7 +69,7 @@ export class VaultOpener {
 		} catch {
 			try {
 				// 旧版本回退：electron.remote
-				// eslint-disable-next-line @typescript-eslint/no-require-imports
+				// eslint-disable-next-line @typescript-eslint/no-require-imports -- Node.js/Electron modules must be loaded via require() at runtime; static import is not available in Obsidian's plugin environment
 				const electron = require('electron') as {
 					remote?: {
 						dialog: {
@@ -107,7 +107,7 @@ export class VaultOpener {
 			return null;
 		}
 
-		// eslint-disable-next-line @typescript-eslint/no-require-imports
+		// eslint-disable-next-line @typescript-eslint/no-require-imports -- Node.js/Electron modules must be loaded via require() at runtime; static import is not available in Obsidian's plugin environment
 		const fs = require('fs') as typeof import('fs');
 
 		// 读取配置
@@ -127,7 +127,7 @@ export class VaultOpener {
 		if (alreadyRegistered) return false;
 
 		// 生成 8 位随机 hex ID，写入新条目
-		// eslint-disable-next-line @typescript-eslint/no-require-imports
+		// eslint-disable-next-line @typescript-eslint/no-require-imports -- Node.js/Electron modules must be loaded via require() at runtime; static import is not available in Obsidian's plugin environment
 		const crypto = require('crypto') as typeof import('crypto');
 		const id = crypto.randomBytes(4).toString('hex');
 		vaults[id] = { path: vaultPath, ts: Date.now() };
@@ -149,7 +149,7 @@ export class VaultOpener {
 	 * 主进程处理 URI 时会从磁盘重新读取 obsidian.json，因此刚写入的新条目可被发现。
 	 */
 	private openVaultByName(vaultName: string): void {
-		// eslint-disable-next-line @typescript-eslint/no-require-imports
+		// eslint-disable-next-line @typescript-eslint/no-require-imports -- Node.js/Electron modules must be loaded via require() at runtime; static import is not available in Obsidian's plugin environment
 		const { shell } = require('electron') as {
 			shell: { openExternal(url: string): Promise<void> };
 		};
@@ -163,18 +163,18 @@ export class VaultOpener {
 	 * 获取 obsidian.json 的绝对路径（通过 Electron remote 的 app.getPath）。
 	 */
 	private getConfigPath(): string | null {
-		// eslint-disable-next-line @typescript-eslint/no-require-imports
+		// eslint-disable-next-line @typescript-eslint/no-require-imports -- Node.js/Electron modules must be loaded via require() at runtime; static import is not available in Obsidian's plugin environment
 		const path = require('path') as typeof import('path');
 
 		try {
-			// eslint-disable-next-line @typescript-eslint/no-require-imports
+			// eslint-disable-next-line @typescript-eslint/no-require-imports -- Node.js/Electron modules must be loaded via require() at runtime; static import is not available in Obsidian's plugin environment
 			const remote = require('@electron/remote') as {
 				app: { getPath(name: string): string };
 			};
 			return path.join(remote.app.getPath('appData'), 'obsidian', 'obsidian.json');
 		} catch {
 			try {
-				// eslint-disable-next-line @typescript-eslint/no-require-imports
+				// eslint-disable-next-line @typescript-eslint/no-require-imports -- Node.js/Electron modules must be loaded via require() at runtime; static import is not available in Obsidian's plugin environment
 				const electron = require('electron') as {
 					remote?: { app: { getPath(name: string): string } };
 				};

@@ -89,11 +89,11 @@ export interface StatsModuleSettings {
 }
 
 /** Footnotes 模块暂无独立设置项。 */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- intentionally empty; placeholder interface for future settings
 export interface FootnotesModuleSettings {}
 
 /** Callout 模块暂无独立设置项。 */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- intentionally empty; placeholder interface for future settings
 export interface CalloutModuleSettings {}
 
 export interface ProgressModuleSettings {
@@ -118,23 +118,23 @@ export interface BaseModuleSettings {
 }
 
 /** Vault 模块暂无独立设置项。 */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- intentionally empty; placeholder interface for future settings
 export interface VaultModuleSettings {}
 
 /** Bases 模块暂无独立设置项。 */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- intentionally empty; placeholder interface for future settings
 export interface BasesModuleSettings {}
 
 /** Rename 模块暂无独立设置项。 */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- intentionally empty; placeholder interface for future settings
 export interface RenameModuleSettings {}
 
 /** Clipboard 模块暂无独立设置项。 */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- intentionally empty; placeholder interface for future settings
 export interface ClipboardModuleSettings {}
 
 /** Paste Link 模块暂无独立设置项。 */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- intentionally empty; placeholder interface for future settings
 export interface PasteLinkModuleSettings {}
 
 export interface TerminalModuleSettings {

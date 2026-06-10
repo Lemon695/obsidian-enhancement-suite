@@ -41,7 +41,7 @@ export class TerminalModule implements PluginModule {
 						new Notice(t(terminalCommandsI18n).errorNoTerminal);
 						return;
 					}
-					// eslint-disable-next-line @typescript-eslint/no-require-imports
+					// eslint-disable-next-line @typescript-eslint/no-require-imports -- Node.js built-ins must be loaded via require() at runtime in Obsidian's Electron environment
 					const path = require('path') as typeof import('path');
 					const absDir = path.dirname(path.join(basePath, file.path));
 					this.launcher.launch(absDir);
